@@ -1,10 +1,10 @@
 {
   "name":"framework-simba",
-  "description":"Simba Embedded Programming Platform",
-  "url":"https://github.com/eerimoq/simba",
+  "description":"Simba Embedded Programming Platform // Forked by SWGiacomelli",
+  "url":"https://github.com/swgiacomelli/simba-esp8266",
   "version":"15.0.3",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eerimoq/simba.git"
+    "url": "https://github.com/swgiacomelli/simba-esp8266"
   }
 }
