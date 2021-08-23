@@ -58,11 +58,7 @@ from SCons.Script import DefaultEnvironment
 from platformio.builder.tools.platformio import SRC_DEFAULT_FILTER
 
 # Map the PlatformIO board name to the Simba board name.
-BOARD_MAP = {{
-    "due": "arduino_due",
-    "megaatmega2560": "arduino_mega",
-    "nanoatmega328": "arduino_nano",
-    "uno": "arduino_uno",
+BOARD_MAP = {{    
     "nodemcuv2": "nodemcu",
     "esp32dev": "esp32_devkitc",
     "d1_mini": "wemos_d1_mini"
@@ -70,10 +66,6 @@ BOARD_MAP = {{
 
 # Map the PlatformIO board name to the Simba board name.
 SUPPORTED_BOARDS = [
-    "arduino_due",
-    "arduino_mega",
-    "arduino_nano",
-    "arduino_uno",
     "esp12e",
     "esp01",
     "nodemcu",
