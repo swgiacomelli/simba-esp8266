@@ -33,3 +33,4 @@ spc5tool_gui.json
 
 .src/build
 .lock*
+.vscode
