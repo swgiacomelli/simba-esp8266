@@ -33,18 +33,14 @@
 extern "C" {
 #endif
 
-#if !defined(ARCH_AVR) && defined(__cplusplus)
+#if defined(__cplusplus)
 
 #define __CORRECT_ISO_CPP_STDLIB_H_PROTO
 #define __time_t_defined 1
 #define time_t int
 #define __timer_t_defined 1
 
-#if defined(ARCH_ARM)
-typedef long ssize_t;
-#else
 #include <cstdio>
-#endif
 
 #include <cstdlib>
 #include <cstring>
