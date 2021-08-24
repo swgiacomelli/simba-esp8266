@@ -67,7 +67,6 @@ driver_source_files = ['drivers/' + x for x in (
 	'basic/analog_output_pin.c',
 	'basic/dac.c',
 	'basic/exti.c',
-	'basic/pcint.c',
 	'basic/pin.c',
 	'basic/pwm.c',
 	'basic/pwm_soft.c',
