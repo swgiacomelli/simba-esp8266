@@ -30,3 +30,6 @@ build
 
 spc5tool_gui.json
 *.bak
+
+.src/build
+.lock*
