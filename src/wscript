@@ -26,7 +26,8 @@ toolchain_dir = '/xtensa-toolchain/release/xtensa-toolchain/xtensa-lx106-elf/'
 toolchain_includes = [
     'lib/gcc/xtensa-lx106-elf/4.8.2/include', 
     'lib/gcc/xtensa-lx106-elf/4.8.2/include-fixed', 
-    'xtensa-lx106-elf/include'
+    'xtensa-lx106-elf/include',
+    'xtensa-lx106-elf/include/c++',
     'include',
     ]
 
