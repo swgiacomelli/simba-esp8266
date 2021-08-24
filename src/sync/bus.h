@@ -32,15 +32,15 @@
 #include "simba.h"
 
 struct bus_t {
-    struct rwlock_t rwlock;
-    struct binary_tree_t listeners;
+  struct rwlock_t rwlock;
+  struct binary_tree_t listeners;
 };
 
 struct bus_listener_t {
-    struct binary_tree_node_t base;
-    int id;
-    void *chan_p;
-    struct bus_listener_t *next_p;
+  struct binary_tree_node_t base;
+  int id;
+  void *chan_p;
+  struct bus_listener_t *next_p;
 };
 
 /**
@@ -75,9 +75,7 @@ int bus_init(struct bus_t *self_p);
  *
  * @return zero(0) or negative error code.
  */
-int bus_listener_init(struct bus_listener_t *self_p,
-                      int id,
-                      void *chan_p);
+int bus_listener_init(struct bus_listener_t *self_p, int id, void *chan_p);
 
 /**
  * Attach given listener to given bus. Messages written to the bus
@@ -89,8 +87,7 @@ int bus_listener_init(struct bus_listener_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int bus_attach(struct bus_t *self_p,
-               struct bus_listener_t *listener_p);
+int bus_attach(struct bus_t *self_p, struct bus_listener_t *listener_p);
 
 /**
  * Detatch given listener from given bus. A detached listener will not
@@ -101,8 +98,7 @@ int bus_attach(struct bus_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int bus_detach(struct bus_t *self_p,
-               struct bus_listener_t *listener_p);
+int bus_detach(struct bus_t *self_p, struct bus_listener_t *listener_p);
 
 /**
  * Write given message to given bus. All attached listeners to given
@@ -117,9 +113,6 @@ int bus_detach(struct bus_t *self_p,
  * @return Number of listeners that received the message, or negative
  *         error code.
  */
-int bus_write(struct bus_t *self_p,
-              int id,
-              const void *buf_p,
-              size_t size);
+int bus_write(struct bus_t *self_p, int id, const void *buf_p, size_t size);
 
 #endif

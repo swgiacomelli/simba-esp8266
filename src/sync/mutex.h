@@ -32,10 +32,10 @@
 #include "simba.h"
 
 struct mutex_t {
-    /** Mutex lock state. */
-    int8_t is_locked;
-    /** Wait list. */
-    struct thrd_prio_list_t waiters;
+  /** Mutex lock state. */
+  int8_t is_locked;
+  /** Wait list. */
+  struct thrd_prio_list_t waiters;
 };
 
 /**

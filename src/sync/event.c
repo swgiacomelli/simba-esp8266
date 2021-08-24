@@ -28,139 +28,124 @@
 
 #include "simba.h"
 
-int event_init(struct event_t *self_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
+int event_init(struct event_t *self_p) {
+  ASSERTN(self_p != NULL, EINVAL);
 
-    chan_init(&self_p->base,
-              (ssize_t (*)(void *, void *, size_t))event_read,
-              (ssize_t (*)(void *, const void *, size_t))event_write,
-              (size_t (*)(void *))event_size);
+  chan_init(&self_p->base, (ssize_t(*)(void *, void *, size_t))event_read,
+            (ssize_t(*)(void *, const void *, size_t))event_write,
+            (size_t(*)(void *))event_size);
 
-    self_p->mask = 0;
-    self_p->reader_mask = 0;
+  self_p->mask = 0;
+  self_p->reader_mask = 0;
 
-    return (0);
+  return (0);
 }
 
-ssize_t event_read(struct event_t *self_p,
-                   void *buf_p,
-                   size_t size)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(buf_p != NULL, EINVAL);
-    ASSERTN(size == sizeof(uint32_t), EINVAL);
+ssize_t event_read(struct event_t *self_p, void *buf_p, size_t size) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(buf_p != NULL, EINVAL);
+  ASSERTN(size == sizeof(uint32_t), EINVAL);
 
-    uint32_t *mask_p, mask;
+  uint32_t *mask_p, mask;
 
-    mask_p = (uint32_t *)buf_p;
+  mask_p = (uint32_t *)buf_p;
 
-    sys_lock();
+  sys_lock();
 
-    mask = (self_p->mask & *mask_p);
+  mask = (self_p->mask & *mask_p);
 
-    /* Event already set? Otherwise wait for it. */
-    if (mask != 0) {
-        *mask_p = mask;
-    } else {
-        self_p->reader_mask = *mask_p;
-        self_p->base.reader_p = thrd_self();
-        thrd_suspend_isr(NULL);
-        *mask_p = (self_p->mask & *mask_p);
-    }
+  /* Event already set? Otherwise wait for it. */
+  if (mask != 0) {
+    *mask_p = mask;
+  } else {
+    self_p->reader_mask = *mask_p;
+    self_p->base.reader_p = thrd_self();
+    thrd_suspend_isr(NULL);
+    *mask_p = (self_p->mask & *mask_p);
+  }
+
+  /* Remove read events from the event channel. */
+  self_p->mask &= (~(*mask_p));
+
+  sys_unlock();
+
+  return (size);
+}
+
+ssize_t event_try_read(struct event_t *self_p, void *buf_p, size_t size) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(buf_p != NULL, EINVAL);
+  ASSERTN(size == sizeof(uint32_t), EINVAL);
+
+  uint32_t *mask_p, mask;
+  ssize_t res;
+
+  mask_p = (uint32_t *)buf_p;
+
+  sys_lock();
+
+  mask = (self_p->mask & *mask_p);
+
+  /* Event set? Otherwise return -EAGAIN. */
+  if (mask != 0) {
+    res = size;
+    *mask_p = mask;
 
     /* Remove read events from the event channel. */
     self_p->mask &= (~(*mask_p));
+  } else {
+    *mask_p = 0;
+    res = -EAGAIN;
+  }
 
-    sys_unlock();
+  sys_unlock();
 
-    return (size);
+  return (res);
 }
 
-ssize_t event_try_read(struct event_t *self_p,
-                       void *buf_p,
-                       size_t size)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(buf_p != NULL, EINVAL);
-    ASSERTN(size == sizeof(uint32_t), EINVAL);
+ssize_t event_write(struct event_t *self_p, const void *buf_p, size_t size) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(buf_p != NULL, EINVAL);
+  ASSERTN(size == sizeof(uint32_t), EINVAL);
 
-    uint32_t *mask_p, mask;
-    ssize_t res;
+  sys_lock();
+  size = event_write_isr(self_p, buf_p, size);
+  sys_unlock();
 
-    mask_p = (uint32_t *)buf_p;
-
-    sys_lock();
-
-    mask = (self_p->mask & *mask_p);
-
-    /* Event set? Otherwise return -EAGAIN. */
-    if (mask != 0) {
-        res = size;
-        *mask_p = mask;
-
-        /* Remove read events from the event channel. */
-        self_p->mask &= (~(*mask_p));
-    } else {
-        *mask_p = 0;
-        res = -EAGAIN;
-    }
-
-    sys_unlock();
-
-    return (res);
+  return (size);
 }
 
-ssize_t event_write(struct event_t *self_p,
-                    const void *buf_p,
-                    size_t size)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(buf_p != NULL, EINVAL);
-    ASSERTN(size == sizeof(uint32_t), EINVAL);
+ssize_t event_write_isr(struct event_t *self_p, const void *buf_p,
+                        size_t size) {
+  if (chan_is_polled_isr(&self_p->base)) {
+    thrd_resume_isr(self_p->base.reader_p, 0);
+    self_p->base.reader_p = NULL;
+  }
 
-    sys_lock();
-    size = event_write_isr(self_p, buf_p, size);
-    sys_unlock();
+  self_p->mask |= *(uint32_t *)buf_p;
 
-    return (size);
+  /* Resume reader thread waiting for given event(s). */
+  if ((self_p->base.reader_p != NULL) &&
+      ((self_p->reader_mask & self_p->mask) != 0)) {
+    thrd_resume_isr(self_p->base.reader_p, 0);
+    self_p->base.reader_p = NULL;
+  }
+
+  return (size);
 }
 
-ssize_t event_write_isr(struct event_t *self_p,
-                        const void *buf_p,
-                        size_t size)
-{
-    if (chan_is_polled_isr(&self_p->base)) {
-        thrd_resume_isr(self_p->base.reader_p, 0);
-        self_p->base.reader_p = NULL;
-    }
+ssize_t event_size(struct event_t *self_p) {
+  ASSERTN(self_p != NULL, EINVAL);
 
-    self_p->mask |= *(uint32_t *)buf_p;
-
-    /* Resume reader thread waiting for given event(s). */
-    if ((self_p->base.reader_p != NULL)
-        && ((self_p->reader_mask & self_p->mask) != 0))  {
-        thrd_resume_isr(self_p->base.reader_p, 0);
-        self_p->base.reader_p = NULL;
-    }
-
-    return (size);
+  return (self_p->mask != 0);
 }
 
-ssize_t event_size(struct event_t *self_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
+int event_clear(struct event_t *self_p, uint32_t mask) {
+  ASSERTN(self_p != NULL, EINVAL);
 
-    return (self_p->mask != 0);
-}
+  sys_lock();
+  self_p->mask &= ~mask;
+  sys_unlock();
 
-int event_clear(struct event_t *self_p, uint32_t mask)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-
-    sys_lock();
-    self_p->mask &= ~mask;
-    sys_unlock();
-
-    return (0);
+  return (0);
 }

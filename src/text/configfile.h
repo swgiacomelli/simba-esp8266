@@ -32,8 +32,8 @@
 #include "simba.h"
 
 struct configfile_t {
-    char *buf_p;
-    size_t size;
+  char *buf_p;
+  size_t size;
 };
 
 /**
@@ -46,9 +46,7 @@ struct configfile_t {
  *
  * @return zero(0) or negative error code.
  */
-int configfile_init(struct configfile_t *self_p,
-                    char *buf_p,
-                    size_t size);
+int configfile_init(struct configfile_t *self_p, char *buf_p, size_t size);
 
 /**
  * Set the value of given property in given section.
@@ -60,10 +58,8 @@ int configfile_init(struct configfile_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int configfile_set(struct configfile_t *self_p,
-                   const char *section_p,
-                   const char *property_p,
-                   const char *value_p);
+int configfile_set(struct configfile_t *self_p, const char *section_p,
+                   const char *property_p, const char *value_p);
 
 /**
  * Get the value of given property in given section.
@@ -76,11 +72,8 @@ int configfile_set(struct configfile_t *self_p,
  *
  * @return Value pointer or NULL on failure.
  */
-char *configfile_get(struct configfile_t *self_p,
-                     const char *section_p,
-                     const char *property_p,
-                     char *value_p,
-                     int length);
+char *configfile_get(struct configfile_t *self_p, const char *section_p,
+                     const char *property_p, char *value_p, int length);
 
 /**
  * Get the value of given property in given section, converted to an
@@ -93,10 +86,8 @@ char *configfile_get(struct configfile_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int configfile_get_long(struct configfile_t *self_p,
-                        const char *section_p,
-                        const char *property_p,
-                        long *value_p);
+int configfile_get_long(struct configfile_t *self_p, const char *section_p,
+                        const char *property_p, long *value_p);
 
 /**
  * Get the value of given property in given section, converted to a
@@ -109,9 +100,7 @@ int configfile_get_long(struct configfile_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int configfile_get_float(struct configfile_t *self_p,
-                        const char *section_p,
-                        const char *property_p,
-                        float *value_p);
+int configfile_get_float(struct configfile_t *self_p, const char *section_p,
+                         const char *property_p, float *value_p);
 
 #endif

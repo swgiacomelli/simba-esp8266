@@ -34,33 +34,33 @@
 /**
  * Beginning of a log entry.
  */
-#define CHAN_CONTROL_LOG_BEGIN                              1
+#define CHAN_CONTROL_LOG_BEGIN 1
 
 /**
  * End of a log entry.
  */
-#define CHAN_CONTROL_LOG_END                                2
+#define CHAN_CONTROL_LOG_END 2
 
 /**
  * Beginning of printf output.
  */
-#define CHAN_CONTROL_PRINTF_BEGIN                           3
+#define CHAN_CONTROL_PRINTF_BEGIN 3
 
 /**
  * End of printf output.
  */
-#define CHAN_CONTROL_PRINTF_END                             4
+#define CHAN_CONTROL_PRINTF_END 4
 
 /**
  * Non-blocking read operation. A channel should return -EAGAIN when a
  * read would block the channel.
  */
-#define CHAN_CONTROL_NON_BLOCKING_READ                      5
+#define CHAN_CONTROL_NON_BLOCKING_READ 5
 
 /**
  * Blocking read operation.
  */
-#define CHAN_CONTROL_BLOCKING_READ                          6
+#define CHAN_CONTROL_BLOCKING_READ 6
 
 /**
  * Channel read function callback type.
@@ -71,9 +71,7 @@
  *
  * @return Number of read bytes or negative error code.
  */
-typedef ssize_t (*chan_read_fn_t)(void *self_p,
-                                  void *buf_p,
-                                  size_t size);
+typedef ssize_t (*chan_read_fn_t)(void *self_p, void *buf_p, size_t size);
 
 /**
  * Channel write function callback type.
@@ -84,8 +82,7 @@ typedef ssize_t (*chan_read_fn_t)(void *self_p,
  *
  * @return Number of written bytes or negative error code.
  */
-typedef ssize_t (*chan_write_fn_t)(void *self_p,
-                                   const void *buf_p,
+typedef ssize_t (*chan_write_fn_t)(void *self_p, const void *buf_p,
                                    size_t size);
 
 /**
@@ -96,8 +93,7 @@ typedef ssize_t (*chan_write_fn_t)(void *self_p,
  *
  * @return Operation specific.
  */
-typedef int (*chan_control_fn_t)(void *self_p,
-                                 int operation);
+typedef int (*chan_control_fn_t)(void *self_p, int operation);
 
 /**
  * Channel write filter function callback type.
@@ -109,8 +105,7 @@ typedef int (*chan_control_fn_t)(void *self_p,
  * @return true(1) if the buffer shall be written to the channel,
  *         otherwise false(0).
  */
-typedef int (*chan_write_filter_fn_t)(void *self_p,
-                                      const void *buf_p,
+typedef int (*chan_write_filter_fn_t)(void *self_p, const void *buf_p,
                                       size_t size);
 
 /**
@@ -123,30 +118,30 @@ typedef int (*chan_write_filter_fn_t)(void *self_p,
 typedef size_t (*chan_size_fn_t)(void *self_p);
 
 struct chan_list_elem_t {
-    struct chan_t *chan_p;
+  struct chan_t *chan_p;
 };
 
 struct chan_list_t {
-    struct chan_list_elem_t *elements_p;
-    size_t number_of_elements;
-    size_t len;
+  struct chan_list_elem_t *elements_p;
+  size_t number_of_elements;
+  size_t len;
 };
 
 /**
  * Channel datastructure.
  */
 struct chan_t {
-    chan_read_fn_t read;
-    chan_write_fn_t write;
-    chan_size_fn_t size;
-    chan_control_fn_t control;
-    chan_write_filter_fn_t write_filter_cb;
-    chan_write_fn_t write_isr;
-    chan_write_filter_fn_t write_filter_isr_cb;
-    /* Reader thread waiting for data. */
-    struct thrd_t *reader_p;
-    /* Used by the reader when polling channels. */
-    struct chan_list_t *list_p;
+  chan_read_fn_t read;
+  chan_write_fn_t write;
+  chan_size_fn_t size;
+  chan_control_fn_t control;
+  chan_write_filter_fn_t write_filter_cb;
+  chan_write_fn_t write_isr;
+  chan_write_filter_fn_t write_filter_isr_cb;
+  /* Reader thread waiting for data. */
+  struct thrd_t *reader_p;
+  /* Used by the reader when polling channels. */
+  struct chan_list_t *list_p;
 };
 
 /**
@@ -180,9 +175,7 @@ int chan_module_init(void);
  *
  * @return zero(0) or negative error code.
  */
-int chan_init(struct chan_t *self_p,
-              chan_read_fn_t read,
-              chan_write_fn_t write,
+int chan_init(struct chan_t *self_p, chan_read_fn_t read, chan_write_fn_t write,
               chan_size_fn_t size);
 
 /**
@@ -193,8 +186,7 @@ int chan_init(struct chan_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int chan_set_write_cb(struct chan_t *self_p,
-                      chan_write_fn_t write_cb);
+int chan_set_write_cb(struct chan_t *self_p, chan_write_fn_t write_cb);
 
 /**
  * Set the write isr function callback.
@@ -204,8 +196,7 @@ int chan_set_write_cb(struct chan_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int chan_set_write_isr_cb(struct chan_t *self_p,
-                          chan_write_fn_t write_isr_cb);
+int chan_set_write_isr_cb(struct chan_t *self_p, chan_write_fn_t write_isr_cb);
 
 /**
  * Set the write filter callback function. The write filter function
@@ -243,8 +234,7 @@ int chan_set_write_filter_isr_cb(struct chan_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int chan_set_control_cb(struct chan_t *self_p,
-                        chan_control_fn_t control_cb);
+int chan_set_control_cb(struct chan_t *self_p, chan_control_fn_t control_cb);
 
 /**
  * Read data from given channel. The behaviour of this function
@@ -257,9 +247,7 @@ int chan_set_control_cb(struct chan_t *self_p,
  *
  * @return Number of read bytes or negative error code.
  */
-ssize_t chan_read(void *self_p,
-                  void *buf_p,
-                  size_t size);
+ssize_t chan_read(void *self_p, void *buf_p, size_t size);
 
 /**
  * Write data to given channel. The behaviour of this function depends
@@ -272,9 +260,7 @@ ssize_t chan_read(void *self_p,
  *
  * @return Number of written bytes or negative error code.
  */
-ssize_t chan_write(void *self_p,
-                   const void *buf_p,
-                   size_t size);
+ssize_t chan_write(void *self_p, const void *buf_p, size_t size);
 
 /**
  * Read a character from given channel. The behaviour of this function
@@ -333,9 +319,7 @@ int chan_control(void *self_p, int operation);
  *
  * @return Number of written bytes or negative error code.
  */
-ssize_t chan_write_isr(void *self_p,
-                       const void *buf_p,
-                       size_t size);
+ssize_t chan_write_isr(void *self_p, const void *buf_p, size_t size);
 
 /**
  * Check if a channel is polled. May only be called from isr or with
@@ -436,9 +420,7 @@ void *chan_null(void);
  *
  * @return Always returns -1.
  */
-ssize_t chan_read_null(void *self_p,
-                       void *buf_p,
-                       size_t size);
+ssize_t chan_read_null(void *self_p, void *buf_p, size_t size);
 
 /**
  * Null channel write function callback. Pass to ``chan_init()`` if no
@@ -450,9 +432,7 @@ ssize_t chan_read_null(void *self_p,
  *
  * @return Always returns ``size``.
  */
-ssize_t chan_write_null(void *self_p,
-                        const void *buf_p,
-                        size_t size);
+ssize_t chan_write_null(void *self_p, const void *buf_p, size_t size);
 
 /**
  * Null channel size function callback. Pass to ``chan_init()`` if no

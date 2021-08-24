@@ -30,21 +30,20 @@
 
 #include "atto.h"
 
-int emacs(const char *path_p, void *chin_p, void *chout_p)
-{
-    ASSERTN(chin_p != NULL, EINVAL);
-    ASSERTN(chout_p != NULL, EINVAL);
+int emacs(const char *path_p, void *chin_p, void *chout_p) {
+  ASSERTN(chin_p != NULL, EINVAL);
+  ASSERTN(chout_p != NULL, EINVAL);
 
-    const char *args[2];
+  const char *args[2];
 
-    args[1] = path_p;
+  args[1] = path_p;
 
-    atto_curses_set_input_channel(chin_p);
-    atto_curses_set_output_channel(chout_p);
+  atto_curses_set_input_channel(chin_p);
+  atto_curses_set_output_channel(chout_p);
 
-    if (path_p != NULL) {
-        return (atto_main(2, (char **)args));
-    } else {
-        return (atto_main(1, NULL));
-    }
+  if (path_p != NULL) {
+    return (atto_main(2, (char **)args));
+  } else {
+    return (atto_main(1, NULL));
+  }
 }

@@ -32,8 +32,8 @@
 #include "simba.h"
 
 struct cond_t {
-    /** Wait list. */
-    struct thrd_prio_list_t waiters;
+  /** Wait list. */
+  struct thrd_prio_list_t waiters;
 };
 
 /**
@@ -66,8 +66,7 @@ int cond_init(struct cond_t *self_p);
  *
  * @return zero(0) or negative error code.
  */
-int cond_wait(struct cond_t *self_p,
-              struct mutex_t *mutex_p,
+int cond_wait(struct cond_t *self_p, struct mutex_t *mutex_p,
               struct time_t *timeout_p);
 
 /**

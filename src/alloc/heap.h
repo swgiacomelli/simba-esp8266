@@ -37,24 +37,24 @@
 #define HEAP_FIXED_SIZES_MAX 8
 
 struct heap_fixed_t {
-    void *free_p;
-    size_t size;
+  void *free_p;
+  size_t size;
 };
 
 struct heap_dynamic_t {
-    void *free_p;
+  void *free_p;
 };
 
 /**
  * The heap struct.
  */
 struct heap_t {
-    void *buf_p;
-    size_t size;
-    void *next_p;
-    struct heap_fixed_t fixed[HEAP_FIXED_SIZES_MAX];
-    struct heap_dynamic_t dynamic;
-    struct mutex_t mutex;
+  void *buf_p;
+  size_t size;
+  void *next_p;
+  struct heap_fixed_t fixed[HEAP_FIXED_SIZES_MAX];
+  struct heap_dynamic_t dynamic;
+  struct mutex_t mutex;
 };
 
 /**
@@ -67,9 +67,7 @@ struct heap_t {
  *
  * @return zero(0) or negative error code.
  */
-int heap_init(struct heap_t *self_p,
-              void *buf_p,
-              size_t size,
+int heap_init(struct heap_t *self_p, void *buf_p, size_t size,
               size_t sizes[HEAP_FIXED_SIZES_MAX]);
 
 /**
@@ -84,8 +82,7 @@ int heap_init(struct heap_t *self_p,
  * @return Pointer to allocated buffer, or NULL if no memory could be
  *         allocated.
  */
-void *heap_alloc(struct heap_t *self_p,
-                 size_t size);
+void *heap_alloc(struct heap_t *self_p, size_t size);
 
 /**
  * Decrement the buffer share counter by one and free the buffer if
@@ -96,8 +93,7 @@ void *heap_alloc(struct heap_t *self_p,
  *
  * @return Share count after the free, or negative error code.
  */
-int heap_free(struct heap_t *self_p,
-              void *buf_p);
+int heap_free(struct heap_t *self_p, void *buf_p);
 
 /**
  * Share given buffer ``count`` times.
@@ -108,8 +104,6 @@ int heap_free(struct heap_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int heap_share(struct heap_t *self_p,
-               const void *buf_p,
-               int count);
+int heap_share(struct heap_t *self_p, const void *buf_p, int count);
 
 #endif

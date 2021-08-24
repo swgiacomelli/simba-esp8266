@@ -28,145 +28,131 @@
 
 #include "simba.h"
 
-int list_init(struct list_t *self_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
+int list_init(struct list_t *self_p) {
+  ASSERTN(self_p != NULL, EINVAL);
 
-    self_p->head_p = NULL;
-    self_p->tail_p = NULL;
+  self_p->head_p = NULL;
+  self_p->tail_p = NULL;
 
-    return (0);
+  return (0);
 }
 
-void *list_peek_head(struct list_t *self_p)
-{
-    return (self_p->head_p);
+void *list_peek_head(struct list_t *self_p) { return (self_p->head_p); }
+
+int list_add_head(struct list_t *self_p, void *v_elem_p) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(v_elem_p != NULL, EINVAL);
+
+  struct list_elem_t *elem_p;
+
+  elem_p = v_elem_p;
+
+  elem_p->next_p = self_p->head_p;
+  self_p->head_p = elem_p;
+
+  if (self_p->tail_p == NULL) {
+    self_p->tail_p = elem_p;
+  }
+
+  return (0);
 }
 
-int list_add_head(struct list_t *self_p,
-                  void *v_elem_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(v_elem_p != NULL, EINVAL);
+int list_add_tail(struct list_t *self_p, void *v_elem_p) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(v_elem_p != NULL, EINVAL);
 
-    struct list_elem_t *elem_p;
+  struct list_elem_t *elem_p;
 
-    elem_p = v_elem_p;
+  elem_p = v_elem_p;
+  elem_p->next_p = NULL;
 
-    elem_p->next_p = self_p->head_p;
+  if (self_p->tail_p != NULL) {
+    self_p->tail_p->next_p = elem_p;
+  } else if (self_p->head_p == NULL) {
     self_p->head_p = elem_p;
+  }
 
-    if (self_p->tail_p == NULL) {
-        self_p->tail_p = elem_p;
-    }
+  self_p->tail_p = elem_p;
 
-    return (0);
+  return (0);
 }
 
-int list_add_tail(struct list_t *self_p,
-                  void *v_elem_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(v_elem_p != NULL, EINVAL);
+void *list_remove_head(struct list_t *self_p) {
+  ASSERTNRN(self_p != NULL, EINVAL);
 
-    struct list_elem_t *elem_p;
+  struct list_elem_t *elem_p;
 
-    elem_p = v_elem_p;
+  elem_p = self_p->head_p;
+
+  if (elem_p != NULL) {
+    self_p->head_p = elem_p->next_p;
     elem_p->next_p = NULL;
 
-    if (self_p->tail_p != NULL) {
-        self_p->tail_p->next_p = elem_p;
-    } else if (self_p->head_p == NULL) {
-        self_p->head_p = elem_p;
+    if (self_p->tail_p == elem_p) {
+      self_p->tail_p = NULL;
     }
+  }
 
-    self_p->tail_p = elem_p;
-
-    return (0);
+  return (elem_p);
 }
 
-void *list_remove_head(struct list_t *self_p)
-{
-    ASSERTNRN(self_p != NULL, EINVAL);
+int list_iter_init(struct list_iter_t *self_p, struct list_t *list_p) {
+  ASSERTN(self_p != NULL, EINVAL);
+  ASSERTN(list_p != NULL, EINVAL);
 
-    struct list_elem_t *elem_p;
+  self_p->next_p = list_p->head_p;
 
-    elem_p = self_p->head_p;
+  return (0);
+}
 
-    if (elem_p != NULL) {
+void *list_iter_next(struct list_iter_t *self_p) {
+  ASSERTNRN(self_p != NULL, EINVAL);
+
+  struct list_elem_t *elem_p;
+
+  elem_p = self_p->next_p;
+
+  if (elem_p != NULL) {
+    self_p->next_p = elem_p->next_p;
+  }
+
+  return (elem_p);
+}
+
+void *list_remove(struct list_t *self_p, void *v_elem_p) {
+  ASSERTNRN(self_p != NULL, EINVAL);
+  ASSERTNRN(v_elem_p != NULL, EINVAL);
+
+  struct list_iter_t iter;
+  struct list_elem_t *elem_p;
+  struct list_elem_t *next_p;
+  struct list_elem_t *prev_p;
+
+  list_iter_init(&iter, self_p);
+
+  elem_p = v_elem_p;
+  prev_p = NULL;
+
+  do {
+    next_p = list_iter_next(&iter);
+
+    /* Requested element? */
+    if (next_p == elem_p) {
+      if (prev_p != NULL) {
+        prev_p->next_p = elem_p->next_p;
+      } else {
         self_p->head_p = elem_p->next_p;
-        elem_p->next_p = NULL;
+      }
 
-        if (self_p->tail_p == elem_p) {
-            self_p->tail_p = NULL;
-        }
+      if (elem_p == self_p->tail_p) {
+        self_p->tail_p = prev_p;
+      }
+
+      return (elem_p);
     }
 
-    return (elem_p);
-}
+    prev_p = next_p;
+  } while (next_p != NULL);
 
-int list_iter_init(struct list_iter_t *self_p,
-                   struct list_t *list_p)
-{
-    ASSERTN(self_p != NULL, EINVAL);
-    ASSERTN(list_p != NULL, EINVAL);
-
-    self_p->next_p = list_p->head_p;
-
-    return (0);
-}
-
-void *list_iter_next(struct list_iter_t *self_p)
-{
-    ASSERTNRN(self_p != NULL, EINVAL);
-
-    struct list_elem_t *elem_p;
-
-    elem_p = self_p->next_p;
-
-    if (elem_p != NULL) {
-        self_p->next_p = elem_p->next_p;
-    }
-
-    return (elem_p);
-}
-
-void *list_remove(struct list_t *self_p,
-                  void *v_elem_p)
-{
-    ASSERTNRN(self_p != NULL, EINVAL);
-    ASSERTNRN(v_elem_p != NULL, EINVAL);
-
-    struct list_iter_t iter;
-    struct list_elem_t *elem_p;
-    struct list_elem_t *next_p;
-    struct list_elem_t *prev_p;
-
-    list_iter_init(&iter, self_p);
-
-    elem_p = v_elem_p;
-    prev_p = NULL;
-
-    do {
-        next_p = list_iter_next(&iter);
-
-        /* Requested element? */
-        if (next_p == elem_p) {
-            if (prev_p != NULL) {
-                prev_p->next_p = elem_p->next_p;
-            } else {
-                self_p->head_p = elem_p->next_p;
-            }
-
-            if (elem_p == self_p->tail_p) {
-                self_p->tail_p = prev_p;
-            }
-
-            return (elem_p);
-        }
-
-        prev_p = next_p;
-    } while (next_p != NULL);
-
-    return (NULL);
+  return (NULL);
 }

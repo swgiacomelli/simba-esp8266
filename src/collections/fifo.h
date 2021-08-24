@@ -32,10 +32,10 @@
 #include "simba.h"
 
 struct fifo_t {
-    int rdpos;
-    int wrpos;
-    void *buf_p;
-    int max;
+  int rdpos;
+  int wrpos;
+  void *buf_p;
+  int max;
 };
 
 /**
@@ -69,26 +69,21 @@ struct fifo_t {
  * @param[in] name The name of the fifo.
  * @param[in] type Type of the elements in the defined fifo.
  */
-#define FIFO_DECLARE_TEMPLATE(name, type)                               \
-    struct fifo_ ## name ## _t {                                        \
-        struct fifo_t fifo;                                             \
-        type *buf_p;                                                    \
-    };                                                                  \
-                                                                        \
-    int fifo_init_ ## name(struct fifo_ ## name ## _t *self_p,          \
-                           type *buf_p,                                 \
-                           int max);                                    \
-                                                                        \
-    int fifo_put_ ## name(struct fifo_ ## name ## _t *self_p,           \
-                          type *value_p);                               \
-                                                                        \
-    int fifo_get_ ## name(struct fifo_ ## name ## _t *self_p,           \
-                          type *value_p);                               \
-                                                                        \
-    type *fifo_peek_ ## name(struct fifo_ ## name ## _t *self_p);       \
-                                                                        \
-    type *fifo_is_used_ ## name(struct fifo_ ## name ## _t *self_p,     \
-                                int index);
+#define FIFO_DECLARE_TEMPLATE(name, type)                                     \
+  struct fifo_##name##_t {                                                    \
+    struct fifo_t fifo;                                                       \
+    type *buf_p;                                                              \
+  };                                                                          \
+                                                                              \
+  int fifo_init_##name(struct fifo_##name##_t *self_p, type *buf_p, int max); \
+                                                                              \
+  int fifo_put_##name(struct fifo_##name##_t *self_p, type *value_p);         \
+                                                                              \
+  int fifo_get_##name(struct fifo_##name##_t *self_p, type *value_p);         \
+                                                                              \
+  type *fifo_peek_##name(struct fifo_##name##_t *self_p);                     \
+                                                                              \
+  type *fifo_is_used_##name(struct fifo_##name##_t *self_p, int index);
 
 /**
  * Define the fifo structure and functions for a given name and type.
@@ -102,72 +97,62 @@ struct fifo_t {
  * @param[in] name The name of the fifo.
  * @param[in] type Type of the elements in the defined fifo.
  */
-#define FIFO_DEFINE_TEMPLATE(name, type)                                \
-    int fifo_init_ ## name(struct fifo_ ## name ## _t *self_p,          \
-                           type *buf_p,                                 \
-                           int max)                                     \
-    {                                                                   \
-        self_p->buf_p = buf_p;                                          \
-                                                                        \
-        return (fifo_init(&self_p->fifo, max));                         \
-    }                                                                   \
-                                                                        \
-    int fifo_put_ ## name(struct fifo_ ## name ## _t *self_p,           \
-                          type *value_p)                                \
-    {                                                                   \
-        int index;                                                      \
-                                                                        \
-        index = fifo_put(&self_p->fifo);                                \
-                                                                        \
-        if (index == -1) {                                              \
-            return (-1);                                                \
-        }                                                               \
-                                                                        \
-        memcpy(&self_p->buf_p[index], value_p, sizeof(*value_p));       \
-                                                                        \
-        return (index);                                                 \
-    }                                                                   \
-                                                                        \
-    int fifo_get_ ## name(struct fifo_ ## name ## _t *self_p,           \
-                          type *value_p)                                \
-    {                                                                   \
-        int index;                                                      \
-                                                                        \
-        index = fifo_get(&self_p->fifo);                                \
-                                                                        \
-        if (index == -1) {                                              \
-            return (-1);                                                \
-        }                                                               \
-                                                                        \
-        if (value_p != NULL) {                                          \
-            memcpy(value_p, &self_p->buf_p[index], sizeof(*value_p));   \
-        }                                                               \
-                                                                        \
-        return (0);                                                     \
-    }                                                                   \
-                                                                        \
-    type *fifo_peek_ ## name(struct fifo_ ## name ## _t *self_p)        \
-    {                                                                   \
-        int index;                                                      \
-                                                                        \
-        index = fifo_peek(&self_p->fifo);                               \
-                                                                        \
-        if (index == -1) {                                              \
-            return (NULL);                                              \
-        }                                                               \
-                                                                        \
-        return (&self_p->buf_p[index]);                                 \
-    }                                                                   \
-                                                                        \
-    type *fifo_is_used_ ## name(struct fifo_ ## name ## _t *self_p,     \
-                                int index)                              \
-    {                                                                   \
-        if (fifo_is_used(&self_p->fifo, index) == 0) {                  \
-            return (NULL);                                              \
-        }                                                               \
-                                                                        \
-        return (&self_p->buf_p[index]);                                 \
-    }
+#define FIFO_DEFINE_TEMPLATE(name, type)                                       \
+  int fifo_init_##name(struct fifo_##name##_t *self_p, type *buf_p, int max) { \
+    self_p->buf_p = buf_p;                                                     \
+                                                                               \
+    return (fifo_init(&self_p->fifo, max));                                    \
+  }                                                                            \
+                                                                               \
+  int fifo_put_##name(struct fifo_##name##_t *self_p, type *value_p) {         \
+    int index;                                                                 \
+                                                                               \
+    index = fifo_put(&self_p->fifo);                                           \
+                                                                               \
+    if (index == -1) {                                                         \
+      return (-1);                                                             \
+    }                                                                          \
+                                                                               \
+    memcpy(&self_p->buf_p[index], value_p, sizeof(*value_p));                  \
+                                                                               \
+    return (index);                                                            \
+  }                                                                            \
+                                                                               \
+  int fifo_get_##name(struct fifo_##name##_t *self_p, type *value_p) {         \
+    int index;                                                                 \
+                                                                               \
+    index = fifo_get(&self_p->fifo);                                           \
+                                                                               \
+    if (index == -1) {                                                         \
+      return (-1);                                                             \
+    }                                                                          \
+                                                                               \
+    if (value_p != NULL) {                                                     \
+      memcpy(value_p, &self_p->buf_p[index], sizeof(*value_p));                \
+    }                                                                          \
+                                                                               \
+    return (0);                                                                \
+  }                                                                            \
+                                                                               \
+  type *fifo_peek_##name(struct fifo_##name##_t *self_p) {                     \
+    int index;                                                                 \
+                                                                               \
+    index = fifo_peek(&self_p->fifo);                                          \
+                                                                               \
+    if (index == -1) {                                                         \
+      return (NULL);                                                           \
+    }                                                                          \
+                                                                               \
+    return (&self_p->buf_p[index]);                                            \
+  }                                                                            \
+                                                                               \
+  type *fifo_is_used_##name(struct fifo_##name##_t *self_p, int index) {       \
+    if (fifo_is_used(&self_p->fifo, index) == 0) {                             \
+      return (NULL);                                                           \
+    }                                                                          \
+                                                                               \
+    return (&self_p->buf_p[index]);                                            \
+  }
 
 /**
  * Initialize given fifo.
@@ -177,14 +162,12 @@ struct fifo_t {
  *
  * @return zero(0) or negative error code.
  */
-static inline int fifo_init(struct fifo_t *self_p,
-                            int max)
-{
-    self_p->rdpos = 0;
-    self_p->wrpos = 0;
-    self_p->max = max;
+static inline int fifo_init(struct fifo_t *self_p, int max) {
+  self_p->rdpos = 0;
+  self_p->wrpos = 0;
+  self_p->max = max;
 
-    return (0);
+  return (0);
 }
 
 /**
@@ -195,19 +178,18 @@ static inline int fifo_init(struct fifo_t *self_p,
  * @return Added element index in fifo, or -1 if there are no free
  *         positions.
  */
-static inline int fifo_put(struct fifo_t *self_p)
-{
-    int i;
-    int wrpos = ((self_p->wrpos + 1) % self_p->max);
+static inline int fifo_put(struct fifo_t *self_p) {
+  int i;
+  int wrpos = ((self_p->wrpos + 1) % self_p->max);
 
-    if (self_p->rdpos == wrpos) {
-        return (-1);
-    }
+  if (self_p->rdpos == wrpos) {
+    return (-1);
+  }
 
-    i = self_p->wrpos;
-    self_p->wrpos = wrpos;
+  i = self_p->wrpos;
+  self_p->wrpos = wrpos;
 
-    return (i);
+  return (i);
 }
 
 /**
@@ -218,19 +200,18 @@ static inline int fifo_put(struct fifo_t *self_p)
  * @return The fetched element index in fifo, or -1 if the fifo is
  *         empty.
  */
-static inline int fifo_get(struct fifo_t *self_p)
-{
-    int i;
+static inline int fifo_get(struct fifo_t *self_p) {
+  int i;
 
-    if (self_p->rdpos == self_p->wrpos) {
-        return (-1);
-    }
+  if (self_p->rdpos == self_p->wrpos) {
+    return (-1);
+  }
 
-    i = self_p->rdpos;
-    self_p->rdpos++;
-    self_p->rdpos %= self_p->max;
+  i = self_p->rdpos;
+  self_p->rdpos++;
+  self_p->rdpos %= self_p->max;
 
-    return (i);
+  return (i);
 }
 
 /**
@@ -241,13 +222,12 @@ static inline int fifo_get(struct fifo_t *self_p)
  * @return The peeked element index in fifo, or -1 if the fifo is
  *         empty.
  */
-static inline int fifo_peek(struct fifo_t *self_p)
-{
-    if (self_p->rdpos == self_p->wrpos) {
-        return (-1);
-    }
+static inline int fifo_peek(struct fifo_t *self_p) {
+  if (self_p->rdpos == self_p->wrpos) {
+    return (-1);
+  }
 
-    return (self_p->rdpos);
+  return (self_p->rdpos);
 }
 
 /**
@@ -258,14 +238,13 @@ static inline int fifo_peek(struct fifo_t *self_p)
  *
  * @return Return true(1) if used, otherwise false(0).
  */
-static inline int fifo_is_used(struct fifo_t *self_p, int index)
-{
-    if (self_p->rdpos <= self_p->wrpos) {
-        return ((index >= self_p->rdpos) && (index < self_p->wrpos));
-    } else {
-        return (((index >= 0) && (index < self_p->wrpos))
-                || ((index >= self_p->rdpos) && (index < self_p->max)));
-    }
+static inline int fifo_is_used(struct fifo_t *self_p, int index) {
+  if (self_p->rdpos <= self_p->wrpos) {
+    return ((index >= self_p->rdpos) && (index < self_p->wrpos));
+  } else {
+    return (((index >= 0) && (index < self_p->wrpos)) ||
+            ((index >= self_p->rdpos) && (index < self_p->max)));
+  }
 }
 
 #endif

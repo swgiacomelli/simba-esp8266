@@ -28,77 +28,69 @@
 
 #include "simba.h"
 
-int cond_module_init()
-{
-    return (0);
+int cond_module_init() { return (0); }
+
+int cond_init(struct cond_t *self_p) {
+  thrd_prio_list_init(&self_p->waiters);
+
+  return (0);
 }
 
-int cond_init(struct cond_t *self_p)
-{
-    thrd_prio_list_init(&self_p->waiters);
+int cond_wait(struct cond_t *self_p, struct mutex_t *mutex_p,
+              struct time_t *timeout_p) {
+  int res;
+  struct thrd_prio_list_elem_t elem;
 
-    return (0);
+  sys_lock();
+
+  mutex_unlock_isr(mutex_p);
+
+  elem.thrd_p = thrd_self();
+  thrd_prio_list_push_isr(&self_p->waiters, &elem);
+
+  res = thrd_suspend_isr(timeout_p);
+
+  if (res == -ETIMEDOUT) {
+    thrd_prio_list_remove_isr(&self_p->waiters, &elem);
+  }
+
+  mutex_lock_isr(mutex_p);
+
+  sys_unlock();
+
+  return (res);
 }
 
-int cond_wait(struct cond_t *self_p,
-              struct mutex_t *mutex_p,
-              struct time_t *timeout_p)
-{
-    int res;
-    struct thrd_prio_list_elem_t elem;
+int cond_signal(struct cond_t *self_p) {
+  struct thrd_prio_list_elem_t *elem_p;
 
-    sys_lock();
+  sys_lock();
 
-    mutex_unlock_isr(mutex_p);
+  elem_p = thrd_prio_list_pop_isr(&self_p->waiters);
 
-    elem.thrd_p = thrd_self();
-    thrd_prio_list_push_isr(&self_p->waiters, &elem);
+  if (elem_p != NULL) {
+    thrd_resume_isr(elem_p->thrd_p, 0);
+  }
 
-    res = thrd_suspend_isr(timeout_p);
+  sys_unlock();
 
-    if (res == -ETIMEDOUT) {
-        thrd_prio_list_remove_isr(&self_p->waiters, &elem);
-    }
-
-    mutex_lock_isr(mutex_p);
-
-    sys_unlock();
-
-    return (res);
+  return (elem_p != NULL);
 }
 
-int cond_signal(struct cond_t *self_p)
-{
-    struct thrd_prio_list_elem_t *elem_p;
+int cond_broadcast(struct cond_t *self_p) {
+  int res;
+  struct thrd_prio_list_elem_t *elem_p;
 
-    sys_lock();
+  sys_lock();
 
-    elem_p = thrd_prio_list_pop_isr(&self_p->waiters);
+  res = 0;
 
-    if (elem_p != NULL) {
-        thrd_resume_isr(elem_p->thrd_p, 0);
-    }
+  while ((elem_p = thrd_prio_list_pop_isr(&self_p->waiters)) != NULL) {
+    thrd_resume_isr(elem_p->thrd_p, 0);
+    res++;
+  }
 
-    sys_unlock();
+  sys_unlock();
 
-    return (elem_p != NULL);
-}
-
-int cond_broadcast(struct cond_t *self_p)
-{
-    int res;
-    struct thrd_prio_list_elem_t *elem_p;
-
-    sys_lock();
-
-    res = 0;
-
-    while ((elem_p = thrd_prio_list_pop_isr(&self_p->waiters)) != NULL) {
-        thrd_resume_isr(elem_p->thrd_p, 0);
-        res++;
-    }
-
-    sys_unlock();
-
-    return (res);
+  return (res);
 }

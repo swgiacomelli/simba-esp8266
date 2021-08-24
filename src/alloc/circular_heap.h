@@ -33,10 +33,10 @@
 
 /* Circular_Heap. */
 struct circular_heap_t {
-    void *begin_p;
-    void *end_p;
-    void *alloc_p;
-    void *free_p;
+  void *begin_p;
+  void *end_p;
+  void *alloc_p;
+  void *free_p;
 };
 
 /**
@@ -49,8 +49,7 @@ struct circular_heap_t {
  *
  * @return zero(0) or negative error code.
  */
-int circular_heap_init(struct circular_heap_t *self_p,
-                       void *buf_p,
+int circular_heap_init(struct circular_heap_t *self_p, void *buf_p,
                        size_t size);
 
 /**
@@ -62,8 +61,7 @@ int circular_heap_init(struct circular_heap_t *self_p,
  * @return Pointer to allocated buffer, or NULL if no memory could be
  *         allocated.
  */
-void *circular_heap_alloc(struct circular_heap_t *self_p,
-                          size_t size);
+void *circular_heap_alloc(struct circular_heap_t *self_p, size_t size);
 
 /**
  * Free the oldest allocated buffer, previously allocated with
@@ -75,7 +73,6 @@ void *circular_heap_alloc(struct circular_heap_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int circular_heap_free(struct circular_heap_t *self_p,
-                       void *buf_p);
+int circular_heap_free(struct circular_heap_t *self_p, void *buf_p);
 
 #endif

@@ -38,10 +38,7 @@
  *
  * @return The bit mask.
  */
-static inline uint32_t bits_mask_32(int width)
-{
-    return ((1 << width) - 1);
-}
+static inline uint32_t bits_mask_32(int width) { return ((1 << width) - 1); }
 
 /**
  * Insert given number of bits into another value at given position.
@@ -57,18 +54,15 @@ static inline uint32_t bits_mask_32(int width)
  *
  * @return The resulting value of the insertion.
  */
-static inline uint32_t bits_insert_32(uint32_t dst,
-                                      int position,
-                                      int size,
-                                      uint32_t src)
-{
-    uint32_t mask;
+static inline uint32_t bits_insert_32(uint32_t dst, int position, int size,
+                                      uint32_t src) {
+  uint32_t mask;
 
-    mask = (((1LU << size) - 1) << position);
-    dst &= ~mask;
-    dst |= ((src << position) & mask);
+  mask = (((1LU << size) - 1) << position);
+  dst &= ~mask;
+  dst |= ((src << position) & mask);
 
-    return (dst);
+  return (dst);
 }
 
 /**

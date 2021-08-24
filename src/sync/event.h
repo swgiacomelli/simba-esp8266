@@ -35,9 +35,9 @@
  * Event channel.
  */
 struct event_t {
-    struct chan_t base;
-    uint32_t mask;                 /* Events that occured. */
-    uint32_t reader_mask;          /* Events the reader are waiting for. */
+  struct chan_t base;
+  uint32_t mask;        /* Events that occured. */
+  uint32_t reader_mask; /* Events the reader are waiting for. */
 };
 
 /**
@@ -64,9 +64,7 @@ int event_init(struct event_t *self_p);
  *
  * @return sizeof(mask) or negative error code.
  */
-ssize_t event_read(struct event_t *self_p,
-                   void *buf_p,
-                   size_t size);
+ssize_t event_read(struct event_t *self_p, void *buf_p, size_t size);
 
 /**
  * Try to read one or more events in given event mask. This function
@@ -83,9 +81,7 @@ ssize_t event_read(struct event_t *self_p,
  * @return sizeof(mask) on success, -EAGAIN if no event was read, and
  *         otherwise other negative error code.
  */
-ssize_t event_try_read(struct event_t *self_p,
-                       void *buf_p,
-                       size_t size);
+ssize_t event_try_read(struct event_t *self_p, void *buf_p, size_t size);
 
 /**
  * Write given event(s) to given event channel.
@@ -96,9 +92,7 @@ ssize_t event_try_read(struct event_t *self_p,
  *
  * @return sizeof(mask) or negative error code.
  */
-ssize_t event_write(struct event_t *self_p,
-                    const void *buf_p,
-                    size_t size);
+ssize_t event_write(struct event_t *self_p, const void *buf_p, size_t size);
 
 /**
  * Write given events to the event channel from isr or with the system
@@ -110,9 +104,7 @@ ssize_t event_write(struct event_t *self_p,
  *
  * @return sizeof(mask) or negative error code.
  */
-ssize_t event_write_isr(struct event_t *self_p,
-                        const void *buf_p,
-                        size_t size);
+ssize_t event_write_isr(struct event_t *self_p, const void *buf_p, size_t size);
 
 /**
  * Checks if there are events active on the event channel.

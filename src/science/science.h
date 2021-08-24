@@ -31,7 +31,7 @@
 
 #include "simba.h"
 
-#define SCIENCE_SEA_LEVEL_STANDARD_PRESSURE            101325
+#define SCIENCE_SEA_LEVEL_STANDARD_PRESSURE 101325
 
 /**
  * Initialize the science module. This function must be called before
@@ -52,8 +52,7 @@ int science_module_init(void);
  *
  * @return Altitude in meters, or NaN if an error occurred.
  */
-float science_pressure_to_altitude(float pressure,
-                                   float pressure_at_sea_level);
+float science_pressure_to_altitude(float pressure, float pressure_at_sea_level);
 
 /**
  * Convert given altitude to an its pressure.

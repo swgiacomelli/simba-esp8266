@@ -35,695 +35,640 @@
 #define VALUE_BUF_MAX (3 * sizeof(long) + 7)
 
 struct buffered_output_t {
-    void *chan_p;
-    int pos;
-    char buffer[CONFIG_STD_OUTPUT_BUFFER_MAX];
-    size_t size;
+  void *chan_p;
+  int pos;
+  char buffer[CONFIG_STD_OUTPUT_BUFFER_MAX];
+  size_t size;
 };
 
 struct snprintf_output_t {
-    char *dst_p;
-    size_t size;
-    size_t size_max;
+  char *dst_p;
+  size_t size;
+  size_t size_max;
 };
 
 /**
  * @return true(1) if the character is part of the string, otherwise
  *         false(0).
  */
-static int char_in_string(char c, const char *str_p)
-{
-    while (*str_p != '\0') {
-        if (c == *str_p) {
-            return (1);
-        }
-
-        str_p++;
+static int char_in_string(char c, const char *str_p) {
+  while (*str_p != '\0') {
+    if (c == *str_p) {
+      return (1);
     }
 
-    return (0);
+    str_p++;
+  }
+
+  return (0);
 }
 
 /**
  * Put characters to buffer.
  */
-static void sprintf_putc(char c, void *arg_p)
-{
-    char **dst_pp = arg_p;
+static void sprintf_putc(char c, void *arg_p) {
+  char **dst_pp = arg_p;
 
-    *(*dst_pp)++ = c;
+  *(*dst_pp)++ = c;
 }
 
 /**
  * Put characters to buffer.
  */
-static void snprintf_putc(char c, void *arg_p)
-{
-    struct snprintf_output_t *output_p;
+static void snprintf_putc(char c, void *arg_p) {
+  struct snprintf_output_t *output_p;
 
-    output_p = arg_p;
+  output_p = arg_p;
 
-    if (output_p->size < output_p->size_max) {
-        output_p->dst_p[output_p->size] = c;
-    }
+  if (output_p->size < output_p->size_max) {
+    output_p->dst_p[output_p->size] = c;
+  }
 
-    output_p->size++;
+  output_p->size++;
 }
 
 /**
  * Put characters to standard output.
  */
-static void fprintf_putc(char c, void *arg_p)
-{
-    struct buffered_output_t *output_p = arg_p;
+static void fprintf_putc(char c, void *arg_p) {
+  struct buffered_output_t *output_p = arg_p;
 
-    output_p->buffer[output_p->pos++] = c;
-    output_p->size++;
+  output_p->buffer[output_p->pos++] = c;
+  output_p->size++;
 
-    if (output_p->pos == membersof(output_p->buffer)) {
-        chan_write(output_p->chan_p, output_p->buffer, output_p->pos);
-        output_p->pos = 0;
-    }
+  if (output_p->pos == membersof(output_p->buffer)) {
+    chan_write(output_p->chan_p, output_p->buffer, output_p->pos);
+    output_p->pos = 0;
+  }
 }
 
 /**
  * Flush output buffer to channel.
  */
-static void output_flush(struct buffered_output_t *output_p)
-{
-    if (output_p->pos > 0) {
-        chan_write(output_p->chan_p, output_p->buffer, output_p->pos);
-        output_p->pos = 0;
-    }
+static void output_flush(struct buffered_output_t *output_p) {
+  if (output_p->pos > 0) {
+    chan_write(output_p->chan_p, output_p->buffer, output_p->pos);
+    output_p->pos = 0;
+  }
 }
 
 /**
  * Put characters to standard output from interrupt context or with
  * the system lock taken.
  */
-static void fprintf_putc_isr(char c, void *arg_p)
-{
-    struct buffered_output_t *output_p = arg_p;
+static void fprintf_putc_isr(char c, void *arg_p) {
+  struct buffered_output_t *output_p = arg_p;
 
-    output_p->buffer[output_p->pos++] = c;
-    output_p->size++;
+  output_p->buffer[output_p->pos++] = c;
+  output_p->size++;
 
-    if (output_p->pos == membersof(output_p->buffer)) {
-        chan_write_isr(output_p->chan_p, output_p->buffer, output_p->pos);
-        output_p->pos = 0;
-    }
+  if (output_p->pos == membersof(output_p->buffer)) {
+    chan_write_isr(output_p->chan_p, output_p->buffer, output_p->pos);
+    output_p->pos = 0;
+  }
 }
 
 /**
  * Flush output buffer to channel.
  */
-static void output_flush_isr(struct buffered_output_t *output_p)
-{
-    if (output_p->pos > 0) {
-        chan_write_isr(output_p->chan_p, output_p->buffer, output_p->pos);
-        output_p->pos = 0;
-    }
+static void output_flush_isr(struct buffered_output_t *output_p) {
+  if (output_p->pos > 0) {
+    chan_write_isr(output_p->chan_p, output_p->buffer, output_p->pos);
+    output_p->pos = 0;
+  }
 }
 
-static void formats(void (*std_putc)(char c, void *arg_p),
-                    void *arg_p,
-                    char *str_p,
-                    char flags,
-                    int width,
-                    char negative_sign)
-{
-    char *s_p = str_p;
+static void formats(void (*std_putc)(char c, void *arg_p), void *arg_p,
+                    char *str_p, char flags, int width, char negative_sign) {
+  char *s_p = str_p;
 
-    while (*s_p++ != '\0') {
-        width--;
+  while (*s_p++ != '\0') {
+    width--;
+  }
+
+  /* Right justification. */
+  if (flags != '-') {
+    if ((negative_sign == 1) && (flags == '0')) {
+      std_putc(*str_p++, arg_p);
     }
 
-    /* Right justification. */
-    if (flags != '-') {
-        if ((negative_sign == 1) && (flags == '0')) {
-            std_putc(*str_p++, arg_p);
-        }
-
-        while (width > 0) {
-            std_putc(flags, arg_p);
-            width--;
-        }
-    }
-
-    /* Number */
-    while (*str_p != '\0') {
-        std_putc(*str_p++, arg_p);
-    }
-
-    /* Left justification. */
     while (width > 0) {
-        std_putc(' ', arg_p);
-        width--;
+      std_putc(flags, arg_p);
+      width--;
     }
+  }
+
+  /* Number */
+  while (*str_p != '\0') {
+    std_putc(*str_p++, arg_p);
+  }
+
+  /* Left justification. */
+  while (width > 0) {
+    std_putc(' ', arg_p);
+    width--;
+  }
 }
 
-static char *formati(char c,
-                     char *str_p,
-                     char radix,
-                     va_list *ap_p,
-                     char length,
-                     char *negative_sign_p)
-{
-    unsigned long value;
-    char digit;
+static char *formati(char c, char *str_p, char radix, va_list *ap_p,
+                     char length, char *negative_sign_p) {
+  unsigned long value;
+  char digit;
 
-    /* Get argument. */
-    if (length == 0) {
-        value = (unsigned long)va_arg(*ap_p, int);
-    } else {
-        value = (unsigned long)va_arg(*ap_p, long);
+  /* Get argument. */
+  if (length == 0) {
+    value = (unsigned long)va_arg(*ap_p, int);
+  } else {
+    value = (unsigned long)va_arg(*ap_p, long);
+  }
+
+  if ((c == 'i') || (c == 'd')) {
+    if (value & (1UL << (sizeof(value) * CHAR_BIT - 1))) {
+      value *= -1;
+      *negative_sign_p = 1;
     }
+  }
 
-    if ((c == 'i') || (c == 'd')) {
-        if (value & (1UL << (sizeof(value) * CHAR_BIT - 1))) {
-            value *= -1;
-            *negative_sign_p = 1;
-        }
+  if (length == 0) {
+    value &= UINT_MAX;
+  }
+
+  /* Format number into buffer. */
+  do {
+    digit = (char)(value % radix);
+    value /= radix;
+    if (digit > 9) {
+      digit += 39;
     }
+    *--str_p = ('0' + digit);
+  } while (value > 0);
 
-    if (length == 0) {
-        value &= UINT_MAX;
-    }
+  if (*negative_sign_p == 1) {
+    *--str_p = '-';
+  }
 
-    /* Format number into buffer. */
-    do {
-        digit = (char)(value % radix);
-        value /= radix;
-        if (digit > 9) {
-            digit += 39;
-        }
-        *--str_p = ('0' + digit);
-    } while (value > 0);
-
-    if (*negative_sign_p == 1) {
-        *--str_p = '-';
-    }
-
-    return (str_p);
+  return (str_p);
 }
 
 #if CONFIG_FLOAT == 1
 
-static char *formatf(char c,
-                     char *str_p,
-                     va_list *ap_p,
-                     char length,
-                     char *negative_sign_p)
-{
-    double value;
-    unsigned long whole_number;
-    unsigned long fraction_number;
-    int i;
+static char *formatf(char c, char *str_p, va_list *ap_p, char length,
+                     char *negative_sign_p) {
+  double value;
+  unsigned long whole_number;
+  unsigned long fraction_number;
+  int i;
 
-    /* Get argument. */
-    value = va_arg(*ap_p, double);
+  /* Get argument. */
+  value = va_arg(*ap_p, double);
 
-    /* Convert a negative value a to positive. */
+  /* Convert a negative value a to positive. */
 #if defined(ARCH_ESP)
-    /* This will not work in all cases when the number is close to
-     * zero. */
-    if ((int)value < 0) {
-        value *= -1.0;
-        *negative_sign_p = 1;
-    }
+  /* This will not work in all cases when the number is close to
+   * zero. */
+  if ((int)value < 0) {
+    value *= -1.0;
+    *negative_sign_p = 1;
+  }
 #else
-    if (value < 0.0) {
-        value *= -1.0;
-        *negative_sign_p = 1;
-    }
+  if (value < 0.0) {
+    value *= -1.0;
+    *negative_sign_p = 1;
+  }
 #endif
 
-    /* Values bigger than 'unsigned long max' are not supported. */
-    whole_number = (unsigned long)value;
-    /* Always print 6 decimal places. */
-    fraction_number = (unsigned long)((value - whole_number) * 1000000.0);
+  /* Values bigger than 'unsigned long max' are not supported. */
+  whole_number = (unsigned long)value;
+  /* Always print 6 decimal places. */
+  fraction_number = (unsigned long)((value - whole_number) * 1000000.0);
 
-    /* Write fraction number to output buffer. */
-    for (i = 0; i < 6; i++) {
-        *--str_p = '0' + (fraction_number % 10);
-        fraction_number /= 10;
-    }
+  /* Write fraction number to output buffer. */
+  for (i = 0; i < 6; i++) {
+    *--str_p = '0' + (fraction_number % 10);
+    fraction_number /= 10;
+  }
 
-    /* Write the decimal dot. */
-    *--str_p = '.';
+  /* Write the decimal dot. */
+  *--str_p = '.';
 
-    /* Write whole number to output buffer. */
-    while (whole_number != 0) {
-        *--str_p = '0' + (whole_number % 10);
-        whole_number /= 10;
-    }
+  /* Write whole number to output buffer. */
+  while (whole_number != 0) {
+    *--str_p = '0' + (whole_number % 10);
+    whole_number /= 10;
+  }
 
-    /* Add negative sign if the number is negative. */
-    if (*negative_sign_p == 1) {
-        *--str_p = '-';
-    }
+  /* Add negative sign if the number is negative. */
+  if (*negative_sign_p == 1) {
+    *--str_p = '-';
+  }
 
-    return (str_p);
+  return (str_p);
 }
 
 #endif
 
-static void vcprintf(void (*std_putc)(char c, void *arg_p),
-                     void *arg_p,
-                     far_string_t fmt_p,
-                     va_list *ap_p)
-{
-    char c, flags, length, negative_sign, buf[VALUE_BUF_MAX], *s_p;
-    int width;
+static void vcprintf(void (*std_putc)(char c, void *arg_p), void *arg_p,
+                     far_string_t fmt_p, va_list *ap_p) {
+  char c, flags, length, negative_sign, buf[VALUE_BUF_MAX], *s_p;
+  int width;
 
-    buf[sizeof(buf) - 1] = '\0';
+  buf[sizeof(buf) - 1] = '\0';
 
-    while ((c = *fmt_p++) != '\0') {
-        if (c != '%') {
-            std_putc(c, arg_p);
-            continue;
-        }
+  while ((c = *fmt_p++) != '\0') {
+    if (c != '%') {
+      std_putc(c, arg_p);
+      continue;
+    }
 
-        /* Prototype: %[flags][width][length]specifier  */
+    /* Prototype: %[flags][width][length]specifier  */
 
-        /* Parse the flags. */
-        flags = ' ';
-        c = *fmt_p++;
+    /* Parse the flags. */
+    flags = ' ';
+    c = *fmt_p++;
 
-        if ((c == '0') || (c == '-')) {
-            flags = c;
-            c = *fmt_p++;
-        }
+    if ((c == '0') || (c == '-')) {
+      flags = c;
+      c = *fmt_p++;
+    }
 
-        /* Parse the width. */
-        width = 0;
+    /* Parse the width. */
+    width = 0;
 
-        while ((c >= '0') && (c <= '9')) {
-            width *= 10;
-            width += (c - '0');
-            c = *fmt_p++;
-        }
+    while ((c >= '0') && (c <= '9')) {
+      width *= 10;
+      width += (c - '0');
+      c = *fmt_p++;
+    }
 
-        /* Parse the length. */
-        length = 0;
+    /* Parse the length. */
+    length = 0;
 
-        if (c == 'l') {
-            length = 1;
-            c = *fmt_p++;
-        }
+    if (c == 'l') {
+      length = 1;
+      c = *fmt_p++;
+    }
 
-        if (c == '\0') {
-            break;
-        }
+    if (c == '\0') {
+      break;
+    }
 
-        /* Parse the specifier. */
-        negative_sign = 0;
+    /* Parse the specifier. */
+    negative_sign = 0;
 
-        switch (c) {
-
-        case 'S':
+    switch (c) {
+      case 'S':
 #if defined(FAR_SPECIAL_ADDRESS)
-            {
-                FAR const char *far_string_p;
+      {
+        FAR const char *far_string_p;
 
-                far_string_p = va_arg(*ap_p, FAR const char*);
+        far_string_p = va_arg(*ap_p, FAR const char *);
 
-                if (far_string_p == NULL) {
-                    far_string_p = FSTR("(null)");
-                }
-
-                s_p = &buf[sizeof(buf) - 1];
-                width -= std_strlen(far_string_p);
-
-                /* Right justification. */
-                if (flags != '-') {
-                    formats(std_putc, arg_p, s_p, flags, width, negative_sign);
-                }
-
-                while (*far_string_p != '\0') {
-                    std_putc(*far_string_p++, arg_p);
-                }
-
-                /* Left justification. */
-                if (flags == '-') {
-                    formats(std_putc, arg_p, s_p, flags, width, negative_sign);
-                }
-            }
-
-            continue;
-#endif
-
-        case 's':
-            s_p = va_arg(*ap_p, char*);
-
-            if (s_p == NULL) {
-                s_p = "(null)";
-            }
-
-            break;
-
-        case 'c':
-            buf[sizeof(buf) - 2] = (char)va_arg(*ap_p, int);
-            s_p = &buf[sizeof(buf) - 2];
-            break;
-
-        case 'i':
-        case 'd':
-        case 'u':
-            s_p = formati(c, &buf[sizeof(buf) - 1], 10, ap_p, length, &negative_sign);
-            break;
-
-        case 'x':
-            s_p = formati(c, &buf[sizeof(buf) - 1], 16, ap_p, length, &negative_sign);
-            break;
-
-#if CONFIG_FLOAT == 1
-        case 'f':
-            s_p = formatf(c, &buf[sizeof(buf) - 1], ap_p, length, &negative_sign);
-            break;
-#endif
-
-        default:
-            std_putc(c, arg_p);
-            continue;
+        if (far_string_p == NULL) {
+          far_string_p = FSTR("(null)");
         }
 
-        formats(std_putc, arg_p, s_p, flags, width, negative_sign);
-    }
-}
+        s_p = &buf[sizeof(buf) - 1];
+        width -= std_strlen(far_string_p);
 
-static void cvcprintf(struct buffered_output_t *output_p,
-                      far_string_t fmt_p,
-                      va_list *ap_p)
-{
-    chan_control(output_p->chan_p, CHAN_CONTROL_PRINTF_BEGIN);
-    vcprintf(fprintf_putc, output_p, fmt_p, ap_p);
-    output_flush(output_p);
-    chan_control(output_p->chan_p, CHAN_CONTROL_PRINTF_END);
-}
+        /* Right justification. */
+        if (flags != '-') {
+          formats(std_putc, arg_p, s_p, flags, width, negative_sign);
+        }
 
-static void print_ascii(void *chan_p, const char *buf_p, size_t size)
-{
-    int i;
+        while (*far_string_p != '\0') {
+          std_putc(*far_string_p++, arg_p);
+        }
 
-    for (i = 0; i < 16 - size; i++) {
-        std_fprintf(chan_p, FSTR("   "));
-    }
+        /* Left justification. */
+        if (flags == '-') {
+          formats(std_putc, arg_p, s_p, flags, width, negative_sign);
+        }
+      }
 
-    std_fprintf(chan_p, FSTR("'"));
+        continue;
+#endif
 
-    for (i = 0; i < size; i++) {
-        std_fprintf(chan_p,
-                    FSTR("%c"),
-                    isprint((int)buf_p[i]) ? buf_p[i] : '.');
-    }
+      case 's':
+        s_p = va_arg(*ap_p, char *);
 
-    std_fprintf(chan_p, FSTR("'"));
-}
+        if (s_p == NULL) {
+          s_p = "(null)";
+        }
 
-int std_module_init(void)
-{
-    return (0);
-}
+        break;
 
-ssize_t std_sprintf(char *dst_p, far_string_t fmt_p, ...)
-{
-    va_list ap;
-    ssize_t res;
+      case 'c':
+        buf[sizeof(buf) - 2] = (char)va_arg(*ap_p, int);
+        s_p = &buf[sizeof(buf) - 2];
+        break;
 
-    va_start(ap, fmt_p);
-    res = std_vsprintf(dst_p, fmt_p, &ap);
-    va_end(ap);
+      case 'i':
+      case 'd':
+      case 'u':
+        s_p =
+            formati(c, &buf[sizeof(buf) - 1], 10, ap_p, length, &negative_sign);
+        break;
 
-    return (res);
-}
+      case 'x':
+        s_p =
+            formati(c, &buf[sizeof(buf) - 1], 16, ap_p, length, &negative_sign);
+        break;
 
-ssize_t std_snprintf(char *dst_p,
-                     size_t size,
-                     far_string_t fmt_p,
-                     ...)
-{
-    va_list ap;
-    ssize_t res;
+#if CONFIG_FLOAT == 1
+      case 'f':
+        s_p = formatf(c, &buf[sizeof(buf) - 1], ap_p, length, &negative_sign);
+        break;
+#endif
 
-    va_start(ap, fmt_p);
-    res = std_vsnprintf(dst_p, size, fmt_p, &ap);
-    va_end(ap);
-
-    return (res);
-}
-
-ssize_t std_vsprintf(char *dst_p, far_string_t fmt_p, va_list *ap_p)
-{
-    ASSERTN(dst_p != NULL, EINVAL);
-    ASSERTN(fmt_p != NULL, EINVAL);
-
-    char *d_p = dst_p;
-
-    vcprintf(sprintf_putc, &d_p, fmt_p, ap_p);
-    sprintf_putc('\0', &d_p);
-
-    return (d_p - dst_p - 1);
-}
-
-ssize_t std_vsnprintf(char *dst_p,
-                      size_t size,
-                      far_string_t fmt_p,
-                      va_list *ap_p)
-{
-    ASSERTN(dst_p != NULL, EINVAL);
-    ASSERTN(fmt_p != NULL, EINVAL);
-
-    struct snprintf_output_t output;
-
-    if (size == 0) {
-        return (-ENOMEM);
+      default:
+        std_putc(c, arg_p);
+        continue;
     }
 
-    output.dst_p = dst_p;
-    output.size = 0;
-    output.size_max = size;
-
-    vcprintf(snprintf_putc, &output, fmt_p, ap_p);
-    snprintf_putc('\0', &output);
-
-    /* Force the string to be NULL terminated. */
-    dst_p[size - 1] = '\0';
-
-    if (output.size > size) {
-        return (-ENOMEM);
-    }
-
-    return (output.size - 1);
+    formats(std_putc, arg_p, s_p, flags, width, negative_sign);
+  }
 }
 
-ssize_t std_printf(far_string_t fmt_p, ...)
-{
-    ASSERTN(fmt_p != NULL, EINVAL);
-
-    va_list ap;
-    struct buffered_output_t output;
-
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = sys_get_stdout();
-
-    va_start(ap, fmt_p);
-    cvcprintf(&output, fmt_p, &ap);
-    va_end(ap);
-
-    return (output.size);
+static void cvcprintf(struct buffered_output_t *output_p, far_string_t fmt_p,
+                      va_list *ap_p) {
+  chan_control(output_p->chan_p, CHAN_CONTROL_PRINTF_BEGIN);
+  vcprintf(fprintf_putc, output_p, fmt_p, ap_p);
+  output_flush(output_p);
+  chan_control(output_p->chan_p, CHAN_CONTROL_PRINTF_END);
 }
 
-ssize_t std_vprintf(far_string_t fmt_p, va_list *ap_p)
-{
-    ASSERTN(fmt_p != NULL, EINVAL);
-    ASSERTN(ap_p != NULL, EINVAL);
+static void print_ascii(void *chan_p, const char *buf_p, size_t size) {
+  int i;
 
-    struct buffered_output_t output;
+  for (i = 0; i < 16 - size; i++) {
+    std_fprintf(chan_p, FSTR("   "));
+  }
 
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = sys_get_stdout();
+  std_fprintf(chan_p, FSTR("'"));
 
-    cvcprintf(&output, fmt_p, ap_p);
+  for (i = 0; i < size; i++) {
+    std_fprintf(chan_p, FSTR("%c"), isprint((int)buf_p[i]) ? buf_p[i] : '.');
+  }
 
-    return (output.size);
+  std_fprintf(chan_p, FSTR("'"));
 }
 
-ssize_t std_fprintf(void *chan_p, far_string_t fmt_p, ...)
-{
-    ASSERTN(chan_p != NULL, EINVAL);
-    ASSERTN(fmt_p != NULL, EINVAL);
+int std_module_init(void) { return (0); }
 
-    va_list ap;
-    struct buffered_output_t output;
+ssize_t std_sprintf(char *dst_p, far_string_t fmt_p, ...) {
+  va_list ap;
+  ssize_t res;
 
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = chan_p;
+  va_start(ap, fmt_p);
+  res = std_vsprintf(dst_p, fmt_p, &ap);
+  va_end(ap);
 
-    va_start(ap, fmt_p);
-    cvcprintf(&output, fmt_p, &ap);
-    va_end(ap);
-
-    return (output.size);
+  return (res);
 }
 
-ssize_t std_vfprintf(void *chan_p, far_string_t fmt_p, va_list *ap_p)
-{
-    ASSERTN(chan_p != NULL, EINVAL);
-    ASSERTN(fmt_p != NULL, EINVAL);
-    ASSERTN(ap_p != NULL, EINVAL);
+ssize_t std_snprintf(char *dst_p, size_t size, far_string_t fmt_p, ...) {
+  va_list ap;
+  ssize_t res;
 
-    struct buffered_output_t output;
+  va_start(ap, fmt_p);
+  res = std_vsnprintf(dst_p, size, fmt_p, &ap);
+  va_end(ap);
 
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = chan_p;
-
-    cvcprintf(&output, fmt_p, ap_p);
-
-    return (output.size);
+  return (res);
 }
 
-ssize_t std_printf_isr(far_string_t fmt_p, ...)
-{
-    va_list ap;
-    struct buffered_output_t output;
+ssize_t std_vsprintf(char *dst_p, far_string_t fmt_p, va_list *ap_p) {
+  ASSERTN(dst_p != NULL, EINVAL);
+  ASSERTN(fmt_p != NULL, EINVAL);
 
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = sys_get_stdout();
+  char *d_p = dst_p;
 
-    va_start(ap, fmt_p);
-    vcprintf(fprintf_putc_isr, &output, fmt_p, &ap);
-    output_flush_isr(&output);
-    va_end(ap);
+  vcprintf(sprintf_putc, &d_p, fmt_p, ap_p);
+  sprintf_putc('\0', &d_p);
 
-    return (output.size);
+  return (d_p - dst_p - 1);
 }
 
-ssize_t std_fprintf_isr(void *chan_p, far_string_t fmt_p, ...)
-{
-    va_list ap;
-    struct buffered_output_t output;
+ssize_t std_vsnprintf(char *dst_p, size_t size, far_string_t fmt_p,
+                      va_list *ap_p) {
+  ASSERTN(dst_p != NULL, EINVAL);
+  ASSERTN(fmt_p != NULL, EINVAL);
 
-    output.pos = 0;
-    output.size = 0;
-    output.chan_p = chan_p;
+  struct snprintf_output_t output;
 
-    va_start(ap, fmt_p);
-    vcprintf(fprintf_putc_isr, &output, fmt_p, &ap);
-    output_flush_isr(&output);
-    va_end(ap);
+  if (size == 0) {
+    return (-ENOMEM);
+  }
 
-    return (output.size);
+  output.dst_p = dst_p;
+  output.size = 0;
+  output.size_max = size;
+
+  vcprintf(snprintf_putc, &output, fmt_p, ap_p);
+  snprintf_putc('\0', &output);
+
+  /* Force the string to be NULL terminated. */
+  dst_p[size - 1] = '\0';
+
+  if (output.size > size) {
+    return (-ENOMEM);
+  }
+
+  return (output.size - 1);
 }
 
-const char *std_strtolb(const char *str_p,
-                        long *value_p,
-                        int base)
-{
-    ASSERTNRN(str_p != NULL, EINVAL);
-    ASSERTNRN(value_p != NULL, EINVAL);
-    ASSERTNRN((base == 16)
-              || (base == 10)
-              || (base == 8)
-              || (base == 2)
-              || (base == 0), EINVAL);
+ssize_t std_printf(far_string_t fmt_p, ...) {
+  ASSERTN(fmt_p != NULL, EINVAL);
 
-    unsigned char c;
-    long sign;
-    long value;
-    int value_found;
+  va_list ap;
+  struct buffered_output_t output;
 
-    sign = 1;
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = sys_get_stdout();
+
+  va_start(ap, fmt_p);
+  cvcprintf(&output, fmt_p, &ap);
+  va_end(ap);
+
+  return (output.size);
+}
+
+ssize_t std_vprintf(far_string_t fmt_p, va_list *ap_p) {
+  ASSERTN(fmt_p != NULL, EINVAL);
+  ASSERTN(ap_p != NULL, EINVAL);
+
+  struct buffered_output_t output;
+
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = sys_get_stdout();
+
+  cvcprintf(&output, fmt_p, ap_p);
+
+  return (output.size);
+}
+
+ssize_t std_fprintf(void *chan_p, far_string_t fmt_p, ...) {
+  ASSERTN(chan_p != NULL, EINVAL);
+  ASSERTN(fmt_p != NULL, EINVAL);
+
+  va_list ap;
+  struct buffered_output_t output;
+
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = chan_p;
+
+  va_start(ap, fmt_p);
+  cvcprintf(&output, fmt_p, &ap);
+  va_end(ap);
+
+  return (output.size);
+}
+
+ssize_t std_vfprintf(void *chan_p, far_string_t fmt_p, va_list *ap_p) {
+  ASSERTN(chan_p != NULL, EINVAL);
+  ASSERTN(fmt_p != NULL, EINVAL);
+  ASSERTN(ap_p != NULL, EINVAL);
+
+  struct buffered_output_t output;
+
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = chan_p;
+
+  cvcprintf(&output, fmt_p, ap_p);
+
+  return (output.size);
+}
+
+ssize_t std_printf_isr(far_string_t fmt_p, ...) {
+  va_list ap;
+  struct buffered_output_t output;
+
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = sys_get_stdout();
+
+  va_start(ap, fmt_p);
+  vcprintf(fprintf_putc_isr, &output, fmt_p, &ap);
+  output_flush_isr(&output);
+  va_end(ap);
+
+  return (output.size);
+}
+
+ssize_t std_fprintf_isr(void *chan_p, far_string_t fmt_p, ...) {
+  va_list ap;
+  struct buffered_output_t output;
+
+  output.pos = 0;
+  output.size = 0;
+  output.chan_p = chan_p;
+
+  va_start(ap, fmt_p);
+  vcprintf(fprintf_putc_isr, &output, fmt_p, &ap);
+  output_flush_isr(&output);
+  va_end(ap);
+
+  return (output.size);
+}
+
+const char *std_strtolb(const char *str_p, long *value_p, int base) {
+  ASSERTNRN(str_p != NULL, EINVAL);
+  ASSERTNRN(value_p != NULL, EINVAL);
+  ASSERTNRN(
+      (base == 16) || (base == 10) || (base == 8) || (base == 2) || (base == 0),
+      EINVAL);
+
+  unsigned char c;
+  long sign;
+  long value;
+  int value_found;
+
+  sign = 1;
+  c = *str_p++;
+
+  /* Find sign. */
+  if (c == '-') {
     c = *str_p++;
+    sign = -1;
+  }
 
-    /* Find sign. */
-    if (c == '-') {
+  if (base == 0) {
+    base = 10;
+
+    /* Find base based on prefix. */
+    if (c == '0') {
+      c = *str_p++;
+
+      if (c == 'x') {
+        base = 16;
         c = *str_p++;
-        sign = -1;
-    }
-
-    if (base == 0) {
-        base = 10;
-
-        /* Find base based on prefix. */
-        if (c == '0') {
-            c = *str_p++;
-
-            if (c == 'x') {
-                base = 16;
-                c = *str_p++;
-            } else if (c == 'b') {
-                base = 2;
-                c = *str_p++;
-            } else {
-                base = 8;
-                c = str_p[-2];
-                str_p--;
-            }
-        }
-    } else if (c == '0') {
-        if (((base == 16) && (*str_p == 'x'))
-            || ((base == 2) && (*str_p == 'b'))) {
-            str_p++;
-            c = *str_p++;
-        };
-    }
-
-    /* Get number. */
-    value_found = 0;
-    value = 0;
-
-    while (((base == 16) && isxdigit(c))
-           || ((base == 10) && isdigit(c))
-           || ((base == 8) && (c >= '0') && (c < '8'))
-           || ((base == 2) && (c >= '0') && (c < '2'))) {
-        value *= base;
-
-        /* Special handling of base 16. */
-        if (base == 16) {
-            if (c >= 'a') {
-                c -= ('a' - '0' - 10);
-            } else if (c >= 'A') {
-                c -= ('A' - '0' - 10);
-            }
-        }
-
-        c -= '0';
-        value += c;
+      } else if (c == 'b') {
+        base = 2;
         c = *str_p++;
-        value_found = 1;
+      } else {
+        base = 8;
+        c = str_p[-2];
+        str_p--;
+      }
+    }
+  } else if (c == '0') {
+    if (((base == 16) && (*str_p == 'x')) || ((base == 2) && (*str_p == 'b'))) {
+      str_p++;
+      c = *str_p++;
+    };
+  }
+
+  /* Get number. */
+  value_found = 0;
+  value = 0;
+
+  while (((base == 16) && isxdigit(c)) || ((base == 10) && isdigit(c)) ||
+         ((base == 8) && (c >= '0') && (c < '8')) ||
+         ((base == 2) && (c >= '0') && (c < '2'))) {
+    value *= base;
+
+    /* Special handling of base 16. */
+    if (base == 16) {
+      if (c >= 'a') {
+        c -= ('a' - '0' - 10);
+      } else if (c >= 'A') {
+        c -= ('A' - '0' - 10);
+      }
     }
 
-    if (value_found == 0) {
-        return (NULL);
-    }
+    c -= '0';
+    value += c;
+    c = *str_p++;
+    value_found = 1;
+  }
 
-    *value_p = (sign * value);
+  if (value_found == 0) {
+    return (NULL);
+  }
 
-    return (str_p - 1);
+  *value_p = (sign * value);
+
+  return (str_p - 1);
 }
 
-const char *std_strtol(const char *str_p, long *value_p)
-{
-    return (std_strtolb(str_p, value_p, 0));
+const char *std_strtol(const char *str_p, long *value_p) {
+  return (std_strtolb(str_p, value_p, 0));
 }
 
 #if CONFIG_FLOAT == 1
 
-static char *skipwhite(const char *q_p)
-{
-    char *p_p = (char *)q_p;
+static char *skipwhite(const char *q_p) {
+  char *p_p = (char *)q_p;
 
-    while (isspace((int)*p_p)) {
-        p_p++;
-    }
+  while (isspace((int)*p_p)) {
+    p_p++;
+  }
 
-    return (p_p);
+  return (p_p);
 }
 
 /*
@@ -731,348 +676,331 @@ static char *skipwhite(const char *q_p)
  * author: Yasuhiro Matsumoto
  * license: public domain
  */
-const char *std_strtod(const char *str, double *value_p)
-{
-    double d = 0.0;
-    int sign;
-    int n = 0;
-    const char *p, *a;
+const char *std_strtod(const char *str, double *value_p) {
+  double d = 0.0;
+  int sign;
+  int n = 0;
+  const char *p, *a;
 
-    a = p = str;
-    p = skipwhite(p);
+  a = p = str;
+  p = skipwhite(p);
 
-    /* decimal part */
+  /* decimal part */
+  sign = 1;
+
+  if (*p == '-') {
+    sign = -1;
+    ++p;
+  } else if (*p == '+') {
+    ++p;
+  }
+
+  if (isdigit((int)*p)) {
+    d = (double)(*p++ - '0');
+
+    while (*p && isdigit((int)*p)) {
+      d = d * 10.0 + (double)(*p - '0');
+      ++p;
+      ++n;
+    }
+
+    a = p;
+  } else if (*p != '.') {
+    goto done;
+  }
+
+  d *= sign;
+
+  /* fraction part */
+  if (*p == '.') {
+    double f = 0.0;
+    double base = 0.1;
+    ++p;
+
+    if (isdigit((int)*p)) {
+      while (*p && isdigit((int)*p)) {
+        f += base * (*p - '0');
+        base /= 10.0;
+        ++p;
+        ++n;
+      }
+    }
+
+    d += f * sign;
+    a = p;
+  }
+
+  /* exponential part */
+  if ((*p == 'E') || (*p == 'e')) {
+    int e = 0;
+    ++p;
+
     sign = 1;
 
     if (*p == '-') {
-        sign = -1;
-        ++p;
+      sign = -1;
+      ++p;
     } else if (*p == '+') {
-        ++p;
+      ++p;
     }
 
     if (isdigit((int)*p)) {
-        d = (double)(*p++ - '0');
+      while (*p == '0') {
+        ++p;
+      }
 
-        while (*p && isdigit((int)*p)) {
-            d = d * 10.0 + (double)(*p - '0');
-            ++p;
-            ++n;
-        }
+      e = (int)(*p++ - '0');
 
-        a = p;
-    } else if (*p != '.') {
-        goto done;
+      while (*p && isdigit((int)*p)) {
+        e = e * 10 + (int)(*p - '0');
+        ++p;
+      }
+
+      e *= sign;
+    } else if (!isdigit((int)*(a - 1))) {
+      a = str;
+      goto done;
+    } else if (*p == 0) {
+      goto done;
     }
 
-    d *= sign;
-
-    /* fraction part */
-    if (*p == '.') {
-        double f = 0.0;
-        double base = 0.1;
-        ++p;
-
-        if (isdigit((int)*p)) {
-            while (*p && isdigit((int)*p)) {
-                f += base * (*p - '0') ;
-                base /= 10.0;
-                ++p;
-                ++n;
-            }
-        }
-
-        d += f * sign;
-        a = p;
+    if (d == 2.2250738585072011 && e == -308) {
+      d = 0.0;
+      a = p;
+      goto done;
     }
 
-    /* exponential part */
-    if ((*p == 'E') || (*p == 'e')) {
-        int e = 0;
-        ++p;
-
-        sign = 1;
-
-        if (*p == '-') {
-            sign = -1;
-            ++p;
-        } else if (*p == '+') {
-            ++p;
-        }
-
-        if (isdigit((int)*p)) {
-            while (*p == '0') {
-                ++p;
-            }
-
-            e = (int)(*p++ - '0');
-
-            while (*p && isdigit((int)*p)) {
-                e = e * 10 + (int)(*p - '0');
-                ++p;
-            }
-
-            e *= sign;
-        } else if (!isdigit((int)*(a-1))) {
-            a = str;
-            goto done;
-        } else if (*p == 0) {
-            goto done;
-        }
-
-        if (d == 2.2250738585072011 && e == -308) {
-            d = 0.0;
-            a = p;
-            goto done;
-        }
-
-        if (d == 2.2250738585072012 && e <= -308) {
+    if (d == 2.2250738585072012 && e <= -308) {
 #if __DBL_MANT_DIG__ > 24
-            d *= 1.0e-308l;
-            a = p;
+      d *= 1.0e-308l;
+      a = p;
 #else
-            d = 0.0;
-            a = str;
+      d = 0.0;
+      a = str;
 #endif
-            goto done;
-        }
-
-        d *= pow(10.0, (double) e);
-        a = p;
-    } else if (p > str && !isdigit((int)*(p-1))) {
-        a = str;
-        goto done;
+      goto done;
     }
 
- done:
-    *value_p = d;
+    d *= pow(10.0, (double)e);
+    a = p;
+  } else if (p > str && !isdigit((int)*(p - 1))) {
+    a = str;
+    goto done;
+  }
 
-    return (a);
+done:
+  *value_p = d;
+
+  return (a);
 }
 
 #endif
 
-const char *std_strtodfp(const char *str_p,
-                         long *value_p,
-                         int precision)
-{
-    int i;
-    long integer;
-    long decimals;
-    int number_of_decimals;
-    const char *integer_end_p;
-    const char *decimal_end_p;
+const char *std_strtodfp(const char *str_p, long *value_p, int precision) {
+  int i;
+  long integer;
+  long decimals;
+  int number_of_decimals;
+  const char *integer_end_p;
+  const char *decimal_end_p;
 
-    /* Integer part. */
-    integer_end_p = std_strtolb(&str_p[0], &integer, 10);
+  /* Integer part. */
+  integer_end_p = std_strtolb(&str_p[0], &integer, 10);
 
-    if (integer_end_p == NULL) {
-        return (NULL);
+  if (integer_end_p == NULL) {
+    return (NULL);
+  }
+
+  for (i = 0; i < precision; i++) {
+    integer *= 10;
+  }
+
+  *value_p = integer;
+
+  if (*integer_end_p != '.') {
+    return (integer_end_p);
+  }
+
+  /* Decimal part. */
+  decimal_end_p = std_strtolb(&integer_end_p[1], &decimals, 10);
+
+  if (decimal_end_p == NULL) {
+    return (integer_end_p + 1);
+  }
+
+  number_of_decimals = (decimal_end_p - &integer_end_p[1]);
+
+  /* Truncate decimals if needed. */
+  if (number_of_decimals > precision) {
+    for (i = 0; i < (number_of_decimals - precision); i++) {
+      decimals /= 10;
+      decimal_end_p--;
     }
 
-    for (i = 0; i < precision; i++) {
-        integer *= 10;
-    }
+    number_of_decimals = precision;
+  }
 
-    *value_p = integer;
+  for (i = 0; i < (precision - number_of_decimals); i++) {
+    decimals *= 10;
+  }
 
-    if (*integer_end_p != '.') {
-        return (integer_end_p);
-    }
+  *value_p += decimals;
 
-    /* Decimal part. */
-    decimal_end_p = std_strtolb(&integer_end_p[1], &decimals, 10);
-
-    if (decimal_end_p == NULL) {
-        return (integer_end_p + 1);
-    }
-
-    number_of_decimals = (decimal_end_p - &integer_end_p[1]);
-
-    /* Truncate decimals if needed. */
-    if (number_of_decimals > precision) {
-        for (i = 0; i < (number_of_decimals - precision); i++) {
-            decimals /= 10;
-            decimal_end_p--;
-        }
-
-        number_of_decimals = precision;
-    }
-
-    for (i = 0; i < (precision - number_of_decimals); i++) {
-        decimals *= 10;
-    }
-
-    *value_p += decimals;
-
-    return (decimal_end_p);
+  return (decimal_end_p);
 }
 
-int std_strcpy(char *dst_p, far_string_t fsrc_p)
-{
-    ASSERTN(dst_p != NULL, EINVAL);
-    ASSERTN(fsrc_p != NULL, EINVAL);
+int std_strcpy(char *dst_p, far_string_t fsrc_p) {
+  ASSERTN(dst_p != NULL, EINVAL);
+  ASSERTN(fsrc_p != NULL, EINVAL);
 
-    size_t length = 0;
+  size_t length = 0;
 
-    while (*fsrc_p != '\0') {
-        *dst_p++ = *fsrc_p++;
-        length++;
-    }
+  while (*fsrc_p != '\0') {
+    *dst_p++ = *fsrc_p++;
+    length++;
+  }
 
-    *dst_p = '\0';
+  *dst_p = '\0';
 
-    return (length);
+  return (length);
 }
 
-int std_strcmp(const char *str_p, far_string_t fstr_p)
-{
-    ASSERTN(str_p != NULL, EINVAL);
-    ASSERTN(fstr_p != NULL, EINVAL);
+int std_strcmp(const char *str_p, far_string_t fstr_p) {
+  ASSERTN(str_p != NULL, EINVAL);
+  ASSERTN(fstr_p != NULL, EINVAL);
 
-    while (*str_p++ == *fstr_p++) {
-        if (str_p[-1] == '\0') {
-            return (0);
-        }
+  while (*str_p++ == *fstr_p++) {
+    if (str_p[-1] == '\0') {
+      return (0);
     }
+  }
 
-    return (str_p[-1] - fstr_p[-1]);
+  return (str_p[-1] - fstr_p[-1]);
 }
 
-int std_strcmp_f(far_string_t fstr0_p,
-                 far_string_t fstr1_p)
-{
-    ASSERTN(fstr0_p != NULL, EINVAL);
-    ASSERTN(fstr1_p != NULL, EINVAL);
+int std_strcmp_f(far_string_t fstr0_p, far_string_t fstr1_p) {
+  ASSERTN(fstr0_p != NULL, EINVAL);
+  ASSERTN(fstr1_p != NULL, EINVAL);
 
-    while (*fstr0_p++ == *fstr1_p++) {
-        if (fstr0_p[-1] == '\0') {
-            return (0);
-        }
+  while (*fstr0_p++ == *fstr1_p++) {
+    if (fstr0_p[-1] == '\0') {
+      return (0);
     }
+  }
 
-    return (fstr0_p[-1] - fstr1_p[-1]);
+  return (fstr0_p[-1] - fstr1_p[-1]);
 }
 
-int std_strncmp(far_string_t fstr_p,
-                const char *str_p,
-                size_t size)
-{
-    ASSERTN(fstr_p != NULL, EINVAL);
-    ASSERTN(str_p != NULL, EINVAL);
+int std_strncmp(far_string_t fstr_p, const char *str_p, size_t size) {
+  ASSERTN(fstr_p != NULL, EINVAL);
+  ASSERTN(str_p != NULL, EINVAL);
 
-    far_string_t fstr_end_p = (fstr_p + size);
+  far_string_t fstr_end_p = (fstr_p + size);
 
-    /* Match if no characters are compared. */
-    if (size == 0) {
-        return (0);
+  /* Match if no characters are compared. */
+  if (size == 0) {
+    return (0);
+  }
+
+  while (*fstr_p++ == *str_p++) {
+    if ((fstr_p[-1] == '\0') || (fstr_p == fstr_end_p)) {
+      return (0);
     }
+  }
 
-    while (*fstr_p++ == *str_p++) {
-        if ((fstr_p[-1] == '\0') || (fstr_p == fstr_end_p)) {
-            return (0);
-        }
-    }
-
-    return (fstr_p[-1] - str_p[-1]);
+  return (fstr_p[-1] - str_p[-1]);
 }
 
-int std_strncmp_f(far_string_t fstr0_p,
-                  far_string_t fstr1_p,
-                  size_t size)
-{
-    ASSERTN(fstr0_p != NULL, EINVAL);
-    ASSERTN(fstr1_p != NULL, EINVAL);
+int std_strncmp_f(far_string_t fstr0_p, far_string_t fstr1_p, size_t size) {
+  ASSERTN(fstr0_p != NULL, EINVAL);
+  ASSERTN(fstr1_p != NULL, EINVAL);
 
-    far_string_t fstr_end_p = (fstr0_p + size);
+  far_string_t fstr_end_p = (fstr0_p + size);
 
-    /* Match if no characters are compared. */
-    if (size == 0) {
-        return (0);
+  /* Match if no characters are compared. */
+  if (size == 0) {
+    return (0);
+  }
+
+  while (*fstr0_p++ == *fstr1_p++) {
+    if ((fstr0_p[-1] == '\0') || (fstr0_p == fstr_end_p)) {
+      return (0);
     }
+  }
 
-    while (*fstr0_p++ == *fstr1_p++) {
-        if ((fstr0_p[-1] == '\0') || (fstr0_p == fstr_end_p)) {
-            return (0);
-        }
-    }
-
-    return (fstr0_p[-1] - fstr1_p[-1]);
+  return (fstr0_p[-1] - fstr1_p[-1]);
 }
 
-int std_strlen(far_string_t fstr_p)
-{
-    ASSERTN(fstr_p != NULL, EINVAL);
+int std_strlen(far_string_t fstr_p) {
+  ASSERTN(fstr_p != NULL, EINVAL);
 
-    far_string_t fstr_start_p = fstr_p;
+  far_string_t fstr_start_p = fstr_p;
 
-    while (*fstr_p++ != '\0') {
-    }
+  while (*fstr_p++ != '\0') {
+  }
 
-    return (fstr_p - fstr_start_p - 1);
+  return (fstr_p - fstr_start_p - 1);
 }
 
-char *std_strip(char *str_p, const char *strip_p)
-{
-    ASSERTNRN(str_p != NULL, EINVAL);
+char *std_strip(char *str_p, const char *strip_p) {
+  ASSERTNRN(str_p != NULL, EINVAL);
 
-    char *begin_p;
-    size_t length;
+  char *begin_p;
+  size_t length;
 
-    /* Strip whitespace characters by default. */
-    if (strip_p == NULL) {
-        strip_p = "\t\n\x0b\x0c\r ";
-    }
+  /* Strip whitespace characters by default. */
+  if (strip_p == NULL) {
+    strip_p = "\t\n\x0b\x0c\r ";
+  }
 
-    /* String leading characters. */
-    while ((*str_p != '\0') && char_in_string(*str_p, strip_p)) {
-        str_p++;
-    }
+  /* String leading characters. */
+  while ((*str_p != '\0') && char_in_string(*str_p, strip_p)) {
+    str_p++;
+  }
 
-    begin_p = str_p;
+  begin_p = str_p;
 
-    /* Strip training characters. */
-    length = strlen(str_p);
-    str_p += (length - 1);
+  /* Strip training characters. */
+  length = strlen(str_p);
+  str_p += (length - 1);
 
-    while ((str_p >= begin_p) && char_in_string(*str_p, strip_p)) {
-        *str_p = '\0';
-        str_p--;
-    }
+  while ((str_p >= begin_p) && char_in_string(*str_p, strip_p)) {
+    *str_p = '\0';
+    str_p--;
+  }
 
-    return (begin_p);
+  return (begin_p);
 }
 
-ssize_t std_hexdump(void *chan_p, const void *buf_p, size_t size)
-{
-    const char *b_p;
-    int pos;
-    ssize_t res;
+ssize_t std_hexdump(void *chan_p, const void *buf_p, size_t size) {
+  const char *b_p;
+  int pos;
+  ssize_t res;
 
-    res = 0;
-    pos = 0;
-    b_p = buf_p;
+  res = 0;
+  pos = 0;
+  b_p = buf_p;
 
-    while (size > 0) {
-        if ((pos % 16) == 0) {
-            std_fprintf(chan_p, FSTR("%08x: "), pos);
-        }
-
-        std_fprintf(chan_p, FSTR("%02x "), b_p[pos] & 0xff);
-
-        if ((pos % 16) == 15) {
-            print_ascii(chan_p, &b_p[pos - 15], 16);
-            std_fprintf(chan_p, FSTR("\r\n"));
-            res += 78;
-        }
-
-        pos++;
-        size--;
+  while (size > 0) {
+    if ((pos % 16) == 0) {
+      std_fprintf(chan_p, FSTR("%08x: "), pos);
     }
 
-    print_ascii(chan_p, &b_p[pos - (pos % 16)], pos % 16);
-    std_fprintf(chan_p, FSTR("\r\n"));
-    res += (60 + (pos % 16));
+    std_fprintf(chan_p, FSTR("%02x "), b_p[pos] & 0xff);
 
-    return (res);
+    if ((pos % 16) == 15) {
+      print_ascii(chan_p, &b_p[pos - 15], 16);
+      std_fprintf(chan_p, FSTR("\r\n"));
+      res += 78;
+    }
+
+    pos++;
+    size--;
+  }
+
+  print_ascii(chan_p, &b_p[pos - (pos % 16)], pos % 16);
+  std_fprintf(chan_p, FSTR("\r\n"));
+  res += (60 + (pos % 16));
+
+  return (res);
 }

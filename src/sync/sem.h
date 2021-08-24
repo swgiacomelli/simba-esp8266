@@ -41,18 +41,16 @@
  * @param[in] count_max Maximum number of users holding the semaphore
  *                      at the same time.
  */
-#define SEM_INIT_DECL(name, _count, _count_max)         \
-    struct sem_t name = { .count = _count,              \
-                          .count_max = _count_max,      \
-                          .head_p = NULL }
+#define SEM_INIT_DECL(name, _count, _count_max) \
+  struct sem_t name = {.count = _count, .count_max = _count_max, .head_p = NULL}
 
 struct sem_t {
-    /** Number of used resources. */
-    int count;
-    /** Maximum number of resources. */
-    int count_max;
-    /** Wait list. */
-    struct thrd_prio_list_t waiters;
+  /** Number of used resources. */
+  int count;
+  /** Maximum number of resources. */
+  int count_max;
+  /** Wait list. */
+  struct thrd_prio_list_t waiters;
 };
 
 /**
@@ -79,9 +77,7 @@ int sem_module_init(void);
  *
  * @return zero(0) or negative error code.
  */
-int sem_init(struct sem_t *self_p,
-             int count,
-             int count_max);
+int sem_init(struct sem_t *self_p, int count, int count_max);
 
 /**
  * Take given semaphore. If the semaphore count is zero the calling
@@ -93,8 +89,7 @@ int sem_init(struct sem_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int sem_take(struct sem_t *self_p,
-             struct time_t *timeout_p);
+int sem_take(struct sem_t *self_p, struct time_t *timeout_p);
 
 /**
  * Give given count to given semaphore. Any suspended thread waiting
@@ -112,8 +107,7 @@ int sem_take(struct sem_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int sem_give(struct sem_t *self_p,
-             int count);
+int sem_give(struct sem_t *self_p, int count);
 
 /**
  * Give given count to given semaphore from isr or with the system
@@ -124,7 +118,6 @@ int sem_give(struct sem_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int sem_give_isr(struct sem_t *self_p,
-                 int count);
+int sem_give_isr(struct sem_t *self_p, int count);
 
 #endif

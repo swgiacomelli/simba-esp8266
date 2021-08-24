@@ -32,14 +32,14 @@
 #include "simba.h"
 
 struct binary_tree_node_t {
-    int key;
-    int height;
-    struct binary_tree_node_t *left_p;
-    struct binary_tree_node_t *right_p;
+  int key;
+  int height;
+  struct binary_tree_node_t *left_p;
+  struct binary_tree_node_t *right_p;
 };
 
 struct binary_tree_t {
-    struct binary_tree_node_t *root_p;
+  struct binary_tree_node_t *root_p;
 };
 
 /**
@@ -76,8 +76,7 @@ int binary_tree_insert(struct binary_tree_t *self_p,
  * @return zero(0) on success, -1 if the node was not found, otherwise
  *         negative error code.
  */
-int binary_tree_delete(struct binary_tree_t *self_p,
-                       int key);
+int binary_tree_delete(struct binary_tree_t *self_p, int key);
 
 /**
  * Search the binary tree for the node with given key.
@@ -88,9 +87,8 @@ int binary_tree_delete(struct binary_tree_t *self_p,
  * @return Pointer to found node or NULL if a node with given key was
  *         not found in the tree.
  */
-struct binary_tree_node_t *
-binary_tree_search(struct binary_tree_t *self_p,
-                   int key);
+struct binary_tree_node_t *binary_tree_search(struct binary_tree_t *self_p,
+                                              int key);
 
 /**
  * Print given binary tree.

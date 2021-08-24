@@ -42,7 +42,7 @@
  * including a newline; without this flag, ``'.'`` will match anything
  * except a newline.
  */
-#define RE_DOTALL     0x02
+#define RE_DOTALL 0x02
 
 /**
  * When specified, the pattern character ``'^'`` matches at the
@@ -54,11 +54,11 @@
  * the string and immediately before the newline (if any) at the end
  * of the string.
  */
-#define RE_MULTILINE  0x04
+#define RE_MULTILINE 0x04
 
 struct re_group_t {
-    const char *buf_p;
-    ssize_t size;
+  const char *buf_p;
+  ssize_t size;
 };
 
 /**
@@ -104,9 +104,7 @@ int re_module_init(void);
  *
  * @return Compiled patten, or NULL if the compilation failed.
  */
-char *re_compile(char *compiled_p,
-                 const char *pattern_p,
-                 char flags,
+char *re_compile(char *compiled_p, const char *pattern_p, char flags,
                  size_t size);
 
 /**
@@ -121,10 +119,7 @@ char *re_compile(char *compiled_p,
  *
  * @return Number of matched bytes or negative error code.
  */
-ssize_t re_match(const char *compiled_p,
-                 const char *buf_p,
-                 size_t size,
-                 struct re_group_t *groups_p,
-                 size_t *number_of_groups_p);
+ssize_t re_match(const char *compiled_p, const char *buf_p, size_t size,
+                 struct re_group_t *groups_p, size_t *number_of_groups_p);
 
 #endif

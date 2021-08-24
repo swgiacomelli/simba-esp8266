@@ -31,63 +31,52 @@
 
 #include "simba.h"
 
-#define QUEUE_FLAGS_NON_BLOCKING_READ                     0x1
+#define QUEUE_FLAGS_NON_BLOCKING_READ 0x1
 
 /* Compile time declaration and initialization of a channel. */
-#define QUEUE_INIT_DECL(_name, _buf, _size)             \
-    struct queue_t _name = {                            \
-        .base = {                                       \
-            .read = (chan_read_fn_t)queue_read,         \
-            .write = (chan_write_fn_t)queue_write,      \
-            .size = (chan_size_fn_t)queue_size,         \
-            .control = chan_control_null,               \
-            .reader_p = NULL,                           \
-            .list_p = NULL                              \
-        },                                              \
-        .writers = {                                    \
-            .head_p = NULL,                             \
-        },                                              \
-        .writer_p = NULL,                               \
-        .buf_p = _buf,                                  \
-        .buffer = {                                     \
-            .buf_p = _buf,                              \
-            .size = _size,                              \
-            .writepos = 0,                              \
-            .readpos = 0                                \
-        },                                              \
-        .state = QUEUE_STATE_INITIALIZED,               \
-        .reader = {                                     \
-            .buf_p = NULL,                              \
-            .size = 0,                                  \
-            .left = 0                                   \
-        }                                               \
-    }
+#define QUEUE_INIT_DECL(_name, _buf, _size)                                  \
+  struct queue_t _name = {                                                   \
+      .base = {.read = (chan_read_fn_t)queue_read,                           \
+               .write = (chan_write_fn_t)queue_write,                        \
+               .size = (chan_size_fn_t)queue_size,                           \
+               .control = chan_control_null,                                 \
+               .reader_p = NULL,                                             \
+               .list_p = NULL},                                              \
+      .writers =                                                             \
+          {                                                                  \
+              .head_p = NULL,                                                \
+          },                                                                 \
+      .writer_p = NULL,                                                      \
+      .buf_p = _buf,                                                         \
+      .buffer = {.buf_p = _buf, .size = _size, .writepos = 0, .readpos = 0}, \
+      .state = QUEUE_STATE_INITIALIZED,                                      \
+      .reader = {.buf_p = NULL, .size = 0, .left = 0}}
 
 enum queue_state_t {
-    /** Queue initialized state. */
-    QUEUE_STATE_INITIALIZED = 0,
+  /** Queue initialized state. */
+  QUEUE_STATE_INITIALIZED = 0,
 
-    /** Queue running state. */
-    QUEUE_STATE_RUNNING,
+  /** Queue running state. */
+  QUEUE_STATE_RUNNING,
 
-    /** Queue stopped state. */
-    QUEUE_STATE_STOPPED,
+  /** Queue stopped state. */
+  QUEUE_STATE_STOPPED,
 };
 
 /* Queue. */
 struct queue_t {
-    struct chan_t base;
-    struct thrd_prio_list_t writers;
-    struct queue_writer_elem_t *writer_p;
-    struct {
-        char *buf_p;
-        size_t size;
-        size_t left;
-    } reader;
-    void *buf_p;
-    struct circular_buffer_t buffer;
-    enum queue_state_t state;
-    int flags;
+  struct chan_t base;
+  struct thrd_prio_list_t writers;
+  struct queue_writer_elem_t *writer_p;
+  struct {
+    char *buf_p;
+    size_t size;
+    size_t left;
+  } reader;
+  void *buf_p;
+  struct circular_buffer_t buffer;
+  enum queue_state_t state;
+  int flags;
 };
 
 /**
@@ -102,9 +91,7 @@ struct queue_t {
  *
  * @return zero(0) or negative error code
  */
-int queue_init(struct queue_t *self_p,
-               void *buf_p,
-               size_t size);
+int queue_init(struct queue_t *self_p, void *buf_p, size_t size);
 
 /**
  * Start given queue. It is not required to start a queue unless it
@@ -144,9 +131,7 @@ int queue_stop_isr(struct queue_t *self_p);
  *
  * @return Number of bytes read or negative error code.
  */
-ssize_t queue_read(struct queue_t *self_p,
-                   void *buf_p,
-                   size_t size);
+ssize_t queue_read(struct queue_t *self_p, void *buf_p, size_t size);
 
 /**
  * Write bytes to given queue. Blocks until size bytes has been
@@ -158,9 +143,7 @@ ssize_t queue_read(struct queue_t *self_p,
  *
  * @return Number of bytes written or negative error code.
  */
-ssize_t queue_write(struct queue_t *self_p,
-                    const void *buf_p,
-                    size_t size);
+ssize_t queue_write(struct queue_t *self_p, const void *buf_p, size_t size);
 
 /**
  * Write bytes to given queue from isr or with the system lock
@@ -172,9 +155,7 @@ ssize_t queue_write(struct queue_t *self_p,
  *
  * @return Number of bytes written or negative error code.
  */
-ssize_t queue_write_isr(struct queue_t *self_p,
-                        const void *buf_p,
-                        size_t size);
+ssize_t queue_write_isr(struct queue_t *self_p, const void *buf_p, size_t size);
 
 /**
  * Get the number of bytes currently stored in the queue. May return
@@ -213,7 +194,6 @@ ssize_t queue_unused_size_isr(struct queue_t *self_p);
  *
  * @return Number of bytes ignored or negative error code.
  */
-ssize_t queue_ignore(struct queue_t *self_p,
-                     size_t size);
+ssize_t queue_ignore(struct queue_t *self_p, size_t size);
 
 #endif

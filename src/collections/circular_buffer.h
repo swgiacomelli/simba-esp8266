@@ -33,10 +33,10 @@
 
 /* Circular buffer. */
 struct circular_buffer_t {
-    char *buf_p;
-    size_t size;
-    size_t writepos;
-    size_t readpos;
+  char *buf_p;
+  size_t size;
+  size_t writepos;
+  size_t readpos;
 };
 
 /**
@@ -48,8 +48,7 @@ struct circular_buffer_t {
  *
  * @return zero(0) or negative error code.
  */
-int circular_buffer_init(struct circular_buffer_t *self_p,
-                         void *buf_p,
+int circular_buffer_init(struct circular_buffer_t *self_p, void *buf_p,
                          size_t size);
 
 /**
@@ -62,8 +61,7 @@ int circular_buffer_init(struct circular_buffer_t *self_p,
  * @return Number of bytes written or negative error code.
  */
 ssize_t circular_buffer_write(struct circular_buffer_t *self_p,
-                              const void *buf_p,
-                              size_t size);
+                              const void *buf_p, size_t size);
 
 /**
  * Read data from given circular buffer.
@@ -75,8 +73,7 @@ ssize_t circular_buffer_write(struct circular_buffer_t *self_p,
  * @return Number of bytes read or negative error code. The buffer is
  *         empty if zero(0) is returned.
  */
-ssize_t circular_buffer_read(struct circular_buffer_t *self_p,
-                             void *buf_p,
+ssize_t circular_buffer_read(struct circular_buffer_t *self_p, void *buf_p,
                              size_t size);
 
 /**
@@ -132,8 +129,7 @@ ssize_t circular_buffer_reverse_skip_back(struct circular_buffer_t *self_p,
  * @return Number of bytes in array or negative error code.
  */
 ssize_t circular_buffer_array_one(struct circular_buffer_t *self_p,
-                                  void **buf_pp,
-                                  size_t size);
+                                  void **buf_pp, size_t size);
 
 /**
  * Get a pointer to the next byte to read from the buffer, following a
@@ -147,8 +143,7 @@ ssize_t circular_buffer_array_one(struct circular_buffer_t *self_p,
  * @return Number of bytes in array or negative error code.
  */
 ssize_t circular_buffer_array_two(struct circular_buffer_t *self_p,
-                                  void **buf_pp,
-                                  size_t size);
+                                  void **buf_pp, size_t size);
 
 /**
  * Find the offset of the first location of given character.
@@ -158,7 +153,6 @@ ssize_t circular_buffer_array_two(struct circular_buffer_t *self_p,
  *
  * @return Found offset, or negative error code.
  */
-ssize_t circular_buffer_find(struct circular_buffer_t *self_p,
-                             char value);
+ssize_t circular_buffer_find(struct circular_buffer_t *self_p, char value);
 
 #endif

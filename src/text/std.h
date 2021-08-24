@@ -86,10 +86,7 @@ ssize_t std_sprintf(char *dst_p, far_string_t fmt_p, ...);
  *         not fit in the destination buffer, or other negative error
  *         code.
  */
-ssize_t std_snprintf(char *dst_p,
-                     size_t size,
-                     far_string_t fmt_p,
-                     ...);
+ssize_t std_snprintf(char *dst_p, size_t size, far_string_t fmt_p, ...);
 
 /**
  * Format and write data to given buffer. The output is null
@@ -120,7 +117,8 @@ ssize_t std_vsprintf(char *dst_p, far_string_t fmt_p, va_list *ap_p);
  *         not fit in the destination buffer, or other negative error
  *         code.
  */
-ssize_t std_vsnprintf(char *dst_p, size_t size, far_string_t fmt_p, va_list *ap_p);
+ssize_t std_vsnprintf(char *dst_p, size_t size, far_string_t fmt_p,
+                      va_list *ap_p);
 
 /**
  * Format and print data to standard output. The output is not null
@@ -222,9 +220,7 @@ ssize_t std_fprintf_isr(void *chan_p, far_string_t fmt_p, ...);
  *
  * @return Pointer to the next byte, or NULL if no value was found.
  */
-const char *std_strtolb(const char *str_p,
-                        long *value_p,
-                        int base);
+const char *std_strtolb(const char *str_p, long *value_p, int base);
 
 /**
  * Convert given string to an integer with base selection based on the
@@ -256,9 +252,7 @@ const char *std_strtod(const char *str_p, double *value_p);
  *
  * @return Pointer to the next byte, or NULL on failure.
  */
-const char *std_strtodfp(const char *str_p,
-                         long *value_p,
-                         int precision);
+const char *std_strtodfp(const char *str_p, long *value_p, int precision);
 
 /**
  * Copy string from far memory to memory.
@@ -290,8 +284,7 @@ int std_strcmp(const char *str_p, far_string_t fstr_p);
  * @return zero(0) if match, otherwise the difference of the
  *         mismatched characters.
  */
-int std_strcmp_f(far_string_t fstr0_p,
-                 far_string_t fstr1_p);
+int std_strcmp_f(far_string_t fstr0_p, far_string_t fstr1_p);
 
 /**
  * Compare at most `size` bytes of one far string and one string.
@@ -303,9 +296,7 @@ int std_strcmp_f(far_string_t fstr0_p,
  * @return zero(0) if match, otherwise the difference of the
  *         mismatched characters.
  */
-int std_strncmp(far_string_t fstr_p,
-                const char *str_p,
-                size_t size);
+int std_strncmp(far_string_t fstr_p, const char *str_p, size_t size);
 
 /**
  * Compare at most `size` bytes of two far strings.
@@ -317,9 +308,7 @@ int std_strncmp(far_string_t fstr_p,
  * @return zero(0) if match, otherwise the difference of the
  *         mismatched characters.
  */
-int std_strncmp_f(far_string_t fstr0_p,
-                  far_string_t fstr1_p,
-                  size_t size);
+int std_strncmp_f(far_string_t fstr0_p, far_string_t fstr1_p, size_t size);
 
 /**
  * Get the length in bytes of given far string, not including null

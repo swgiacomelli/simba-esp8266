@@ -28,29 +28,26 @@
 
 #include "simba.h"
 
-uint8_t bits_reverse_8(uint8_t value)
-{
-    value = (((value & 0xaa) >> 1) | ((value & 0x55) << 1));
-    value = (((value & 0xcc) >> 2) | ((value & 0x33) << 2));
+uint8_t bits_reverse_8(uint8_t value) {
+  value = (((value & 0xaa) >> 1) | ((value & 0x55) << 1));
+  value = (((value & 0xcc) >> 2) | ((value & 0x33) << 2));
 
-    return (((value & 0xf0) >> 4) | ((value & 0x0f) << 4));
+  return (((value & 0xf0) >> 4) | ((value & 0x0f) << 4));
 }
 
-uint16_t bits_reverse_16(uint16_t value)
-{
-    value = (((value & 0xaaaa) >> 1) | ((value & 0x5555) << 1));
-    value = (((value & 0xcccc) >> 2) | ((value & 0x3333) << 2));
-    value = (((value & 0xf0f0) >> 4) | ((value & 0x0f0f) << 4));
+uint16_t bits_reverse_16(uint16_t value) {
+  value = (((value & 0xaaaa) >> 1) | ((value & 0x5555) << 1));
+  value = (((value & 0xcccc) >> 2) | ((value & 0x3333) << 2));
+  value = (((value & 0xf0f0) >> 4) | ((value & 0x0f0f) << 4));
 
-    return (((value & 0xff00) >> 8) | ((value & 0x00ff) << 8));
+  return (((value & 0xff00) >> 8) | ((value & 0x00ff) << 8));
 }
 
-uint32_t bits_reverse_32(uint32_t value)
-{
-    value = (((value & 0xaaaaaaaa) >> 1) | ((value & 0x55555555) << 1));
-    value = (((value & 0xcccccccc) >> 2) | ((value & 0x33333333) << 2));
-    value = (((value & 0xf0f0f0f0) >> 4) | ((value & 0x0f0f0f0f) << 4));
-    value = (((value & 0xff00ff00) >> 8) | ((value & 0x00ff00ff) << 8));
+uint32_t bits_reverse_32(uint32_t value) {
+  value = (((value & 0xaaaaaaaa) >> 1) | ((value & 0x55555555) << 1));
+  value = (((value & 0xcccccccc) >> 2) | ((value & 0x33333333) << 2));
+  value = (((value & 0xf0f0f0f0) >> 4) | ((value & 0x0f0f0f0f) << 4));
+  value = (((value & 0xff00ff00) >> 8) | ((value & 0x00ff00ff) << 8));
 
-    return ((value >> 16) | (value << 16));
+  return ((value >> 16) | (value << 16));
 }

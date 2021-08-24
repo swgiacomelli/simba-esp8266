@@ -32,10 +32,10 @@
 #include "simba.h"
 
 struct rwlock_t {
-    int number_of_readers;
-    int number_of_writers;
-    volatile struct rwlock_elem_t *readers_p;
-    volatile struct rwlock_elem_t *writers_p;
+  int number_of_readers;
+  int number_of_writers;
+  volatile struct rwlock_elem_t *readers_p;
+  volatile struct rwlock_elem_t *writers_p;
 };
 
 /**

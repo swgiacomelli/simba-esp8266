@@ -34,20 +34,20 @@
 typedef int (*hash_map_hash_t)(longptr_t key);
 
 struct hash_map_entry_t {
-    struct hash_map_entry_t *next_p;
-    longptr_t key;
-    longptr_t value;
+  struct hash_map_entry_t *next_p;
+  longptr_t key;
+  longptr_t value;
 };
 
 struct hash_map_bucket_t {
-    struct hash_map_entry_t *list_p;
+  struct hash_map_entry_t *list_p;
 };
 
 struct hash_map_t {
-    struct hash_map_bucket_t *buckets_p;
-    size_t buckets_max;
-    struct hash_map_entry_t *entries_p;
-    hash_map_hash_t hash;
+  struct hash_map_bucket_t *buckets_p;
+  size_t buckets_max;
+  struct hash_map_entry_t *entries_p;
+  hash_map_hash_t hash;
 };
 
 /**
@@ -63,10 +63,8 @@ struct hash_map_t {
  * @return zero(0) or negative error code.
  */
 int hash_map_init(struct hash_map_t *self_p,
-                  struct hash_map_bucket_t *buckets_p,
-                  size_t buckets_max,
-                  struct hash_map_entry_t *entries_p,
-                  size_t entries_max,
+                  struct hash_map_bucket_t *buckets_p, size_t buckets_max,
+                  struct hash_map_entry_t *entries_p, size_t entries_max,
                   hash_map_hash_t hash);
 
 /**
@@ -79,9 +77,7 @@ int hash_map_init(struct hash_map_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int hash_map_add(struct hash_map_t *self_p,
-                 longptr_t key,
-                 longptr_t value);
+int hash_map_add(struct hash_map_t *self_p, longptr_t key, longptr_t value);
 
 /**
  * Remove given key from hash map.
@@ -91,8 +87,7 @@ int hash_map_add(struct hash_map_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int hash_map_remove(struct hash_map_t *self_p,
-                    longptr_t key);
+int hash_map_remove(struct hash_map_t *self_p, longptr_t key);
 
 /**
  * Get value for given key.
@@ -105,8 +100,6 @@ int hash_map_remove(struct hash_map_t *self_p,
  * @return zero(0) if the key was found, otherwise negative error
  *         code.
  */
-int hash_map_get(struct hash_map_t *self_p,
-                 longptr_t key,
-                 longptr_t *value_p);
+int hash_map_get(struct hash_map_t *self_p, longptr_t key, longptr_t *value_p);
 
 #endif

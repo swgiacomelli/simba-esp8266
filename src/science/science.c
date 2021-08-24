@@ -29,85 +29,62 @@
 #include "simba.h"
 #include <math.h>
 
-#define MOLAR_MASS                               0.0289644
+#define MOLAR_MASS 0.0289644
 #define EARTH_SURFACE_GRAVITATIONAL_ACCELERATION 9.80665
-#define IDEAL_GAS_CONSTANT                       8.31432
-#define SEA_LEVEL_TEMPERATURE                    288.15
-#define TEMPERATURE_LAPSE_RATE                   0.0065
+#define IDEAL_GAS_CONSTANT 8.31432
+#define SEA_LEVEL_TEMPERATURE 288.15
+#define TEMPERATURE_LAPSE_RATE 0.0065
 
-int science_module_init()
-{
-    return (0);
-}
+int science_module_init() { return (0); }
 
 #if CONFIG_FLOAT == 1
 
 float science_pressure_to_altitude(float pressure,
-                                   float pressure_at_sea_level)
-{
-    float altitude;
-    float rl_gm;
+                                   float pressure_at_sea_level) {
+  float altitude;
+  float rl_gm;
 
-    if (pressure > 22632.1) {
-        rl_gm = ((IDEAL_GAS_CONSTANT * TEMPERATURE_LAPSE_RATE)
-                 / (EARTH_SURFACE_GRAVITATIONAL_ACCELERATION * MOLAR_MASS));
-        altitude = (1.0 - pow(pressure / SCIENCE_SEA_LEVEL_STANDARD_PRESSURE,
-                              rl_gm));
-        altitude *= (SEA_LEVEL_TEMPERATURE / TEMPERATURE_LAPSE_RATE);
-    } else {
-        altitude = NAN;
-    }
+  if (pressure > 22632.1) {
+    rl_gm = ((IDEAL_GAS_CONSTANT * TEMPERATURE_LAPSE_RATE) /
+             (EARTH_SURFACE_GRAVITATIONAL_ACCELERATION * MOLAR_MASS));
+    altitude =
+        (1.0 - pow(pressure / SCIENCE_SEA_LEVEL_STANDARD_PRESSURE, rl_gm));
+    altitude *= (SEA_LEVEL_TEMPERATURE / TEMPERATURE_LAPSE_RATE);
+  } else {
+    altitude = NAN;
+  }
 
-    return (altitude);
+  return (altitude);
 }
 
 float science_pressure_from_altitude(float altitude,
-                                     float pressure_at_sea_level)
-{
-    float pressure;
-    float lh_t0;
-    float gm_rl;
+                                     float pressure_at_sea_level) {
+  float pressure;
+  float lh_t0;
+  float gm_rl;
 
-    if (altitude < 11000.0) {
-        lh_t0 = ((TEMPERATURE_LAPSE_RATE * altitude) / SEA_LEVEL_TEMPERATURE);
-        gm_rl = ((EARTH_SURFACE_GRAVITATIONAL_ACCELERATION * MOLAR_MASS)
-                 / (IDEAL_GAS_CONSTANT * TEMPERATURE_LAPSE_RATE));
-        pressure = (pressure_at_sea_level * pow(1.0 - lh_t0, gm_rl));
-    } else {
-        pressure = NAN;
-    }
+  if (altitude < 11000.0) {
+    lh_t0 = ((TEMPERATURE_LAPSE_RATE * altitude) / SEA_LEVEL_TEMPERATURE);
+    gm_rl = ((EARTH_SURFACE_GRAVITATIONAL_ACCELERATION * MOLAR_MASS) /
+             (IDEAL_GAS_CONSTANT * TEMPERATURE_LAPSE_RATE));
+    pressure = (pressure_at_sea_level * pow(1.0 - lh_t0, gm_rl));
+  } else {
+    pressure = NAN;
+  }
 
-    return (pressure);
+  return (pressure);
 }
 
-float science_mps_to_kmph(float speed)
-{
-    return (3.6 * speed);
-}
+float science_mps_to_kmph(float speed) { return (3.6 * speed); }
 
-float science_mps_from_kmph(float speed)
-{
-    return (speed / 3.6);
-}
+float science_mps_from_kmph(float speed) { return (speed / 3.6); }
 
-float science_mps_to_knots(float speed)
-{
-    return (1.94384 * speed);
-}
+float science_mps_to_knots(float speed) { return (1.94384 * speed); }
 
-float science_mps_from_knots(float speed)
-{
-    return (speed / 1.94384);
-}
+float science_mps_from_knots(float speed) { return (speed / 1.94384); }
 
-float science_mps_to_mph(float speed)
-{
-    return (2.23694 * speed);
-}
+float science_mps_to_mph(float speed) { return (2.23694 * speed); }
 
-float science_mps_from_mph(float speed)
-{
-    return (speed / 2.23694);
-}
+float science_mps_from_mph(float speed) { return (speed / 2.23694); }
 
 #endif

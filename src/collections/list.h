@@ -36,22 +36,22 @@
  * member.
  */
 struct list_elem_t {
-    struct list_elem_t *next_p;
+  struct list_elem_t *next_p;
 };
 
 /**
  * A singly linked list.
  */
 struct list_t {
-    struct list_elem_t *head_p;
-    struct list_elem_t *tail_p;
+  struct list_elem_t *head_p;
+  struct list_elem_t *tail_p;
 };
 
 /**
  * A singly linked list iterator.
  */
 struct list_iter_t {
-    struct list_elem_t *next_p;
+  struct list_elem_t *next_p;
 };
 
 /**
@@ -85,8 +85,7 @@ void *list_peek_head(struct list_t *self_p);
  *
  * @return zero(0) or negative error code.
  */
-int list_add_head(struct list_t *self_p,
-                  void *elem_p);
+int list_add_head(struct list_t *self_p, void *elem_p);
 
 /**
  * Add given element to the end of given list.
@@ -96,8 +95,7 @@ int list_add_head(struct list_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int list_add_tail(struct list_t *self_p,
-                  void *elem_p);
+int list_add_tail(struct list_t *self_p, void *elem_p);
 
 /**
  * Get the first element of given list and then remove it from given
@@ -117,8 +115,7 @@ void *list_remove_head(struct list_t *self_p);
  *
  * @return Removed element, or NULL if the element was not found.
  */
-void *list_remove(struct list_t *self_p,
-                  void *elem_p);
+void *list_remove(struct list_t *self_p, void *elem_p);
 
 /**
  * Initialize given iterator object.
@@ -128,8 +125,7 @@ void *list_remove(struct list_t *self_p,
  *
  * @return zero(0) or negative error code.
  */
-int list_iter_init(struct list_iter_t *self_p,
-                   struct list_t *list_p);
+int list_iter_init(struct list_iter_t *self_p, struct list_t *list_p);
 
 /**
  * Get the next element from given iterator object.
