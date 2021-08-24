@@ -1,0 +1,386 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# rough definition
+
+VERSION='15.0.3'
+APPNAME='simba-esp8266'
+
+top = '.'
+out = 'build'
+
+arch = 'esp'
+family = 'esp'
+board = 'esp12e'
+mcu = 'esp8266'
+
+all_defines = [
+    'ARCH_'+arch.upper(), 
+    'FAMILY_'+family.upper(), 
+    'MCU_'+mcu.upper(),
+    'BOARD_'+board.upper()]
+
+mcu_source_files = []
+board_source_files = []
+
+toolchain_dir = '/xtensa-toolchain/release/xtensa-toolchain/xtensa-lx106-elf/'   
+toolchain_includes = [
+    'lib/gcc/xtensa-lx106-elf/4.8.2/include', 
+    'lib/gcc/xtensa-lx106-elf/4.8.2/include-fixed', 
+    'xtensa-lx106-elf/include'
+    'include',
+    ]
+
+
+simba_includes = [
+    '../3pp/compat',
+    '../3pp/mbedtls/include',
+    '../3pp/spiffs-0.3.5/src',
+    '../3pp/atto',
+    '../3pp/atto/curses',
+    'drivers/ports/' + arch, 
+    'kernel/ports/' + arch + '/gnu', 
+    'oam/ports/' + family,    
+    'boards/' + board,
+    'mcus/' + mcu
+    ]
+
+alloc_source_files = ['alloc/'+ x for x in (
+    'heap.c', 
+    'circular_heap.c')]
+
+collections_source_files = ['collections/' + x for x in (
+    'binary_tree.c',
+	'bits.c',
+	'circular_buffer.c',
+	'hash_map.c',
+	'list.c')]
+
+debug_source_files = ['debug/' + x for x in (
+    'log.c',
+    'harness.c'
+)]
+
+driver_source_files = ['drivers/' + x for x in (
+	'basic/adc.c',
+	'basic/analog_input_pin.c',
+	'basic/analog_output_pin.c',
+	'basic/chipid.c',
+	'basic/dac.c',
+	'basic/exti.c',
+	'basic/pcint.c',
+	'basic/pin.c',
+	'basic/pwm.c',
+	'basic/pwm_soft.c',
+	'basic/power.c',
+	'basic/random.c',
+	'basic/watchdog.c',
+	'displays/hd44780.c',
+	'displays/led_7seg_ht16k33.c',
+	'displays/ws2812.c',
+	'network/can.c',
+	'network/esp_wifi.c',
+	'network/esp_wifi/station.c',
+	'network/esp_wifi/softap.c',
+	'network/i2c.c',
+	'network/i2c_soft.c',
+	'network/icsp_soft.c',
+	'network/jtag_soft.c',
+	'network/mcp2515.c',
+	'network/nrf24l01.c',
+	'network/owi.c',
+	'network/spi.c',
+	'network/uart.c',
+	'network/uart_soft.c',
+	'network/usb.c',
+	'network/usb_device.c',
+	'network/usb/device/descriptors.c',
+	'network/usb/device/class/cdc.c',
+	'network/usb_host.c',
+	'network/usb/host/class/hid.c',
+	'network/usb/host/class/mass_storage.c',
+	'network/xbee.c',
+	'network/xbee_client.c',
+	'sensors/bmp280.c',
+	'sensors/dht.c',
+	'sensors/ds18b20.c',
+	'sensors/hx711.c',
+	'sensors/sht3xd.c',
+	'storage/eeprom_i2c.c',
+	'storage/eeprom_soft.c',
+	'storage/flash.c',
+	'storage/sd.c',
+	'various/ds3231.c',
+	'various/gnss.c',
+)]
+
+if family == 'linux':
+    driver_source_files += ['drivers/ports/linux/socket_device.c']
+
+encode_source_files = ['encode/' + x for x in (
+    'base64.c',
+    'hex.c',
+    'json.c',
+    'nmea.c',
+)]
+
+hash_source_files = ['hash/' + x for x in ('crc.c', 'sha1.c')]
+
+internet_source_files = ['inet/' + x for x in (
+    'http_server.c',
+	'http_websocket_server.c',
+	'http_websocket_client.c',
+	'inet.c',
+	'isotp.c',
+	'mqtt_client.c',
+	'tftp_server.c',
+	'network_interface.c',
+	'network_interface/slip.c',
+	'network_interface/wifi.c',
+	'slip.c',
+	'socket.c',
+	'ping.c',
+)]
+
+if family in ('esp', 'esp32'):
+    internet_source_files += ['inet/network_interface/driver/esp.c']
+
+if family in ('esp', 'esp32', 'linux'):
+    internet_source_files += ['inet/ssl.c']
+    internet_source_files += ['../3pp/compat/mbedtls/library/' + x for x in (
+        'mbedtls_aes.c', 
+        'mbedtls_aesni.c', 
+        'mbedtls_arc4.c', 
+        'mbedtls_asn1parse.c', 
+        'mbedtls_asn1write.c', 
+        'mbedtls_base64.c', 
+        'mbedtls_bignum.c', 
+        'mbedtls_camellia.c', 
+        'mbedtls_ccm.c', 
+        'mbedtls_cipher.c', 
+        'mbedtls_cipher_wrap.c', 
+        'mbedtls_cmac.c', 
+        'mbedtls_ctr_drbg.c', 
+        'mbedtls_des.c', 
+        'mbedtls_dhm.c', 
+        'mbedtls_ecdh.c', 
+        'mbedtls_ecdsa.c', 
+        'mbedtls_ecjpake.c', 
+        'mbedtls_ecp.c', 
+        'mbedtls_ecp_curves.c', 
+        'mbedtls_entropy.c', 
+        'mbedtls_entropy_poll.c', 
+        'mbedtls_error.c', 
+        'mbedtls_gcm.c', 
+        'mbedtls_havege.c', 
+        'mbedtls_hmac_drbg.c', 
+        'mbedtls_md2.c', 
+        'mbedtls_md4.c', 
+        'mbedtls_md5.c', 
+        'mbedtls_md.c', 
+        'mbedtls_md_wrap.c', 
+        'mbedtls_memory_buffer_alloc.c', 
+        'mbedtls_oid.c', 
+        'mbedtls_padlock.c', 
+        'mbedtls_pem.c', 
+        'mbedtls_pk.c', 
+        'mbedtls_pkcs11.c', 
+        'mbedtls_pkcs12.c', 
+        'mbedtls_pkcs5.c', 
+        'mbedtls_pkparse.c', 
+        'mbedtls_pk_wrap.c', 
+        'mbedtls_pkwrite.c', 
+        'mbedtls_platform.c', 
+        'mbedtls_ripemd160.c', 
+        'mbedtls_rsa.c', 
+        'mbedtls_sha1.c', 
+        'mbedtls_sha256.c', 
+        'mbedtls_sha512.c', 
+        'mbedtls_ssl_cache.c', 
+        'mbedtls_ssl_ciphersuites.c', 
+        'mbedtls_ssl_cli.c', 
+        'mbedtls_ssl_cookie.c', 
+        'mbedtls_ssl_srv.c', 
+        'mbedtls_ssl_ticket.c', 
+        'mbedtls_ssl_tls.c', 
+        'mbedtls_threading.c', 
+        'mbedtls_version.c', 
+        'mbedtls_version_features.c', 
+        'mbedtls_x509.c', 
+        'mbedtls_x509_create.c', 
+        'mbedtls_x509_crl.c', 
+        'mbedtls_x509_crt.c', 
+        'mbedtls_x509_csr.c', 
+        'mbedtls_x509write_crt.c', 
+        'mbedtls_x509write_csr.c', 
+        'mbedtls_xtea.c',)] + ['../3pp/compat/mbedtls/mbedtls_compat.c']
+    all_defines += ['MBEDTLS_NO_PLATFORM_ENTROPY']
+
+kernel_source_files = ['kernel/' + x for x in (
+    'errno.c',
+	'sys.c',
+	'thrd.c',
+	'time.c',
+	'timer.c')]
+
+if family == 'esp32':
+    kernel_source_files += ['kernel/ports/esp32/gnu/thrd_port.S']
+
+multimedia_source_files = ['multimedia/midi.c']
+
+oam_source_files_list = [
+    'console.c',
+	'nvm.c',
+	'service.c',
+	'settings.c',
+	'shell.c',
+	'soam.c']
+
+if family in ('esp32', 'linux'):
+    oam_source_files_list += [
+    'upgrade.c'
+	'upgrade/http.c'
+	'upgrade/kermit.c'
+	'upgrade/tftp.c'
+	'upgrade/uds.c']
+
+oam_source_files = ['oam/' + x for x in oam_source_files_list]
+
+file_system_source_files = ['filesystems/' + x for x in ('fat16.c', 'fs.c', 'spiffs.c')]
+
+spiffs_source_files = ['../3pp/spiffs-0.3.5/src/' + x for x in (
+    'spiffs_nucleus.c',
+	'spiffs_gc.c',
+	'spiffs_hydrogen.c',
+	'spiffs_cache.c',
+	'spiffs_check.c')]
+
+sync_source_files = ['sync/' + x for x in (
+        'bus.c',
+	    'chan.c',
+	    'cond.c',
+	    'event.c',
+	    'mutex.c',
+	    'queue.c',
+	    'rwlock.c',
+	    'sem.c')]
+
+text_source_files = ['text/' + x for x in (
+    'configfile.c',
+    'emacs.c',
+    'std.c',
+    're.c')]
+
+atto_source_fils = ['../3pp/atto/' + x for x in (
+'buffer.c',
+'command.c',
+'complete.c',
+'display.c',
+'gap.c',
+'key.c',
+'atto_main.c',
+'replace.c',
+'search.c',
+'window.c',
+'curses/curses.c')]
+
+science_source_files = ['science/' + x for x in ('math.c', 'science.c')]
+
+if mcu == 'esp8266':
+    mcu_source_files += ['mcus/esp8266/' + x for x in ('mcu.c', 'esp8266.c')]
+    simba_includes += ['../3pp/ESP8266_RTOS_SDK' + x for x in (
+       '/extra_include',
+       '/include',
+       '/include/espressif',
+       '/include/espressif/esp8266',
+       '/include/lwip',
+       '/include/lwip/ipv4',
+       '/include/lwip/ipv6',)]
+    all_defines += ['F_CPU=80000000UL']
+
+if board == 'esp12e':
+    board_source_files += ['boards/esp12e/board.c']
+    all_defines += ['ESP_FLASH_SIZE=4MB']
+
+if family not in ('esp', 'esp32'):
+    simba_includes += ['../3pp/lwip-1.4.1/src/include', '../3pp/lwip-1.4.1/src/include/ipv4']
+
+all_defines += ['VERSION=master', 'MBEDTLS_USER_CONFIG_FILE="mbedtls/user_config.h"','ICACHE_FLASH', '__STRICT_ANSI__', '__ets__']
+all_include_files = ['.', '..'] + simba_includes + [toolchain_dir + x for x in toolchain_includes]
+all_source_files = alloc_source_files + \
+                   collections_source_files + \
+                   debug_source_files + \
+                   driver_source_files + \
+                   encode_source_files + \
+                   hash_source_files + \
+                   internet_source_files + \
+                   kernel_source_files + \
+                   multimedia_source_files + \
+                   oam_source_files + \
+                   file_system_source_files + \
+                   spiffs_source_files + \
+                   sync_source_files + \
+                   text_source_files + \
+                   atto_source_fils + \
+                   science_source_files + \
+                   mcu_source_files + \
+                   board_source_files
+
+def options(opt):
+    opt.load('compiler_c')
+
+def configure(conf):
+    conf.load('compiler_c')
+    conf.env.CFLAGS += ['-std=c11', '-MM', '-MT']
+    conf.env.CXXFLAGS += ['-std=c++17', '-MM', '-MT']
+
+    if mcu == 'esp8266':
+        conf.env.CFLAGS += [
+        '-Werror',
+        '-nostdlib',
+        '-mlongcalls',
+        '-mtext-section-literals',
+        '-ffunction-sections',
+	    '-fno-inline-functions',
+	    '-fsingle-precision-constant',
+        '-fdata-sections',
+        ]
+        conf.env.CXXFLAGS += [
+        '-Werror',
+        '-nostdlib',
+        '-mlongcalls',
+        '-mtext-section-literals',
+        '-ffunction-sections',
+        '-fdata-sections',
+        ]
+
+
+def build(bld):
+    bld.stlib(
+        target='simba-esp8266-lib', 
+        source=all_source_files, 
+        defines=all_defines,
+        includes=all_include_files)
+
+# simba.flash.4m.ld
+# LIBPATH += "$(SIMBA_ROOT)/src/mcus/esp8266/ld"
+
+# LDFLAGS += -Wl,-T$(LINKER_SCRIPT)
+
+# LIB_MINIC ?= minic
+# LIB_CIROM ?= cirom
+
+# LIB += \
+# 	hal \
+# 	gcc \
+# 	phy \
+# 	pp \
+# 	net80211 \
+# 	wpa \
+# 	crypto \
+# 	main \
+# 	freertos \
+# 	lwip \
+# 	m \
+# 	$(LIB_CIROM) \
+# 	stdc++ \
+# 	$(LIB_MINIC)
