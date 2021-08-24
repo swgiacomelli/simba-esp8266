@@ -73,7 +73,6 @@ driver_source_files = ['drivers/' + x for x in (
 	'basic/pwm_soft.c',
 	'basic/power.c',
 	'basic/random.c',
-	'basic/watchdog.c',
 	'displays/hd44780.c',
 	'displays/led_7seg_ht16k33.c',
 	'displays/ws2812.c',
@@ -98,8 +97,7 @@ driver_source_files = ['drivers/' + x for x in (
 	'sensors/sht3xd.c',
 	'storage/eeprom_i2c.c',
 	'storage/eeprom_soft.c',
-	'storage/flash.c',
-	'storage/sd.c',
+	'storage/flash.c',	
 	'various/ds3231.c',
 	'various/gnss.c',
 )]
