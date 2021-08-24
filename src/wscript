@@ -87,7 +87,6 @@ driver_source_files = ['drivers/' + x for x in (
 	'network/icsp_soft.c',
 	'network/jtag_soft.c',
 	'network/mcp2515.c',
-	'network/nrf24l01.c',
 	'network/owi.c',
 	'network/spi.c',
 	'network/uart.c',
