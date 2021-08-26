@@ -25,8 +25,6 @@
  * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
- *
- * This file is part of the Simba project.
  */
 
 #ifndef __SIMBA_H__
@@ -173,10 +171,7 @@ typedef intptr_t longptr_t;
 #ifdef PORT_HAS_SD
 #include "drivers/storage/sd.h"
 #endif
-    == == ==
-    =
->>>>>>> Stashed changes
-        #ifdef PORT_HAS_DS18B20
+#ifdef PORT_HAS_DS18B20
 #include "drivers/sensors/ds18b20.h"
 #endif
 #ifdef PORT_HAS_OWI
@@ -200,8 +195,7 @@ typedef intptr_t longptr_t;
 #ifdef PORT_HAS_DS3231
 #include "drivers/various/ds3231.h"
 #endif
-<<<<<<< Updated upstream
-        #ifdef PORT_HAS_MCP2515
+#ifdef PORT_HAS_MCP2515
 #include "drivers/network/mcp2515.h"
 #endif
 #ifdef PORT_HAS_NRF24L01
@@ -226,10 +220,7 @@ typedef intptr_t longptr_t;
 #include "drivers/network/usb/host/class/hid.h"
 #include "drivers/network/usb/host/class/mass_storage.h"
 #endif
-        == == ==
-    =
->>>>>>> Stashed changes
-        #ifdef PORT_HAS_ESP_WIFI
+#ifdef PORT_HAS_ESP_WIFI
 #include "drivers/network/esp_wifi.h"
 #include "drivers/network/esp_wifi/station.h"
 #include "drivers/network/esp_wifi/softap.h"
