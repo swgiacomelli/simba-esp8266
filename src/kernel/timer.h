@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2014-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #ifndef __KERNEL_TIMER_H__
 #define __KERNEL_TIMER_H__
@@ -38,19 +18,19 @@
  * A periodic timer will call the function callback periodically. This
  * continues until the timer is stopped.
  */
-#define TIMER_PERIODIC        (1 << 0)
+#define TIMER_PERIODIC (1 << 0)
 
 /** Timer callback prototype. */
 typedef void (*timer_callback_t)(void *arg_p);
 
 /* Timer. */
 struct timer_t {
-    struct timer_t *next_p;
-    uint32_t delta;
-    uint32_t timeout;
-    int flags;
-    timer_callback_t callback;
-    void *arg_p;
+  struct timer_t *next_p;
+  uint32_t delta;
+  uint32_t timeout;
+  int flags;
+  timer_callback_t callback;
+  void *arg_p;
 };
 
 /**
@@ -82,11 +62,8 @@ int timer_module_init(void);
  *
  * @return zero(0) or negative error code.
  */
-int timer_init(struct timer_t *self_p,
-               const struct time_t *timeout_p,
-               timer_callback_t callback,
-               void *arg_p,
-               int flags);
+int timer_init(struct timer_t *self_p, const struct time_t *timeout_p,
+               timer_callback_t callback, void *arg_p, int flags);
 
 /**
  * Start given initialized timer object.

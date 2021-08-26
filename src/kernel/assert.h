@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2014-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #ifndef __KERNEL_ASSERT_H__
 #define __KERNEL_ASSERT_H__
@@ -38,9 +18,9 @@
  * Check is an error code is fatal (negative error code).
  */
 #if CONFIG_ASSERT_FORCE_FATAL == 1
-#    define IS_FATAL(n)                                   (1)
+#define IS_FATAL(n) (1)
 #else
-#    define IS_FATAL(n)                               (n < 0)
+#define IS_FATAL(n) (n < 0)
 #endif
 
 /**
@@ -77,27 +57,27 @@
  * otherwise return given error code ``res``.
  */
 #if CONFIG_ASSERT == 1
-#    if CONFIG_ASSERT_FORCE_PANIC == 1
-#        define ASSERTNR(cond, n, res, ...)                             \
-    if (!(cond)) {                                                      \
-        sys_panic(OSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: ("   \
-                       #cond ", " #n ") " #__VA_ARGS__));               \
-    }
-#    else
-#        define ASSERTNR(cond, n, res, ...)                             \
-    if (!(cond)) {                                                      \
-        std_printf(OSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: ("  \
-                        #cond ", " #n ") " #__VA_ARGS__ "\r\n"));       \
-                                                                        \
-        if (IS_FATAL(n)) {                                              \
-            sys.on_fatal_callback(n);                                   \
-        }   else {                                                      \
-            return (res);                                               \
-        }                                                               \
-    }
-#    endif
+#if CONFIG_ASSERT_FORCE_PANIC == 1
+#define ASSERTNR(cond, n, res, ...)                                \
+  if (!(cond)) {                                                   \
+    sys_panic(OSTR(__FILE__ ":" STRINGIFY(                         \
+        __LINE__) ": ASSERT: (" #cond ", " #n ") " #__VA_ARGS__)); \
+  }
 #else
-#    define ASSERTNR(cond, n, ...)
+#define ASSERTNR(cond, n, res, ...)                                       \
+  if (!(cond)) {                                                          \
+    std_printf(OSTR(__FILE__ ":" STRINGIFY(                               \
+        __LINE__) ": ASSERT: (" #cond ", " #n ") " #__VA_ARGS__ "\r\n")); \
+                                                                          \
+    if (IS_FATAL(n)) {                                                    \
+      sys.on_fatal_callback(n);                                           \
+    } else {                                                              \
+      return (res);                                                       \
+    }                                                                     \
+  }
+#endif
+#else
+#define ASSERTNR(cond, n, ...)
 #endif
 
 /**
@@ -106,27 +86,27 @@
  * ``n`` on fatal error, otherwise return.
  */
 #if CONFIG_ASSERT == 1
-#    if CONFIG_ASSERT_FORCE_PANIC == 1
-#        define ASSERTNRV(cond, n, ...)                                 \
-    if (!(cond)) {                                                      \
-        sys_panic(OSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: ("   \
-                       #cond ", " #n ") " #__VA_ARGS__ ));              \
-    }
-#    else
-#    define ASSERTNRV(cond, n, ...)                                     \
-    if (!(cond)) {                                                      \
-        std_printf(OSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: ("  \
-                        #cond ", " #n ") " #__VA_ARGS__ "\r\n"));       \
-                                                                        \
-        if (IS_FATAL(n)) {                                              \
-            sys.on_fatal_callback(n);                                   \
-        }   else {                                                      \
-            return;                                                     \
-        }                                                               \
-    }
-#    endif
+#if CONFIG_ASSERT_FORCE_PANIC == 1
+#define ASSERTNRV(cond, n, ...)                                    \
+  if (!(cond)) {                                                   \
+    sys_panic(OSTR(__FILE__ ":" STRINGIFY(                         \
+        __LINE__) ": ASSERT: (" #cond ", " #n ") " #__VA_ARGS__)); \
+  }
 #else
-#    define ASSERTNRV(cond, n, ...)
+#define ASSERTNRV(cond, n, ...)                                           \
+  if (!(cond)) {                                                          \
+    std_printf(OSTR(__FILE__ ":" STRINGIFY(                               \
+        __LINE__) ": ASSERT: (" #cond ", " #n ") " #__VA_ARGS__ "\r\n")); \
+                                                                          \
+    if (IS_FATAL(n)) {                                                    \
+      sys.on_fatal_callback(n);                                           \
+    } else {                                                              \
+      return;                                                             \
+    }                                                                     \
+  }
+#endif
+#else
+#define ASSERTNRV(cond, n, ...)
 #endif
 
 /**
@@ -145,15 +125,16 @@
  * ``CONFIG_FATAL_ASSERT``.
  */
 #if CONFIG_FATAL_ASSERT == 1
-#    define FATAL_ASSERTN(cond, n, ...)                                 \
-    if (!(cond)) {                                                      \
-        std_fprintf(console_get_output_channel(),                       \
-                    FSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: (" \
-                         #cond ", " #n ") " #__VA_ARGS__ "\r\n"));      \
-        sys.on_fatal_callback(n);                                       \
-    }
+#define FATAL_ASSERTN(cond, n, ...)                                       \
+  if (!(cond)) {                                                          \
+    std_fprintf(                                                          \
+        console_get_output_channel(),                                     \
+        FSTR(__FILE__ ":" STRINGIFY(__LINE__) ": ASSERT: (" #cond ", " #n \
+                                              ") " #__VA_ARGS__ "\r\n")); \
+    sys.on_fatal_callback(n);                                             \
+  }
 #else
-#    define FATAL_ASSERTN(cond, n, ...)
+#define FATAL_ASSERTN(cond, n, ...)
 #endif
 
 /**
@@ -174,20 +155,20 @@
  * ``CONFIG_PANIC_ASSERT``.
  */
 #if CONFIG_PANIC_ASSERT == 1
-#    if CONFIG_PANIC_ASSERT_FILE_LINE == 1
-#        define PANIC_ASSERTN(cond, n, ...)                     \
-    if (!(cond)) {                                              \
-        sys_panic(FSTR(#n ":" __FILE__ ":" STRINGIFY(__LINE__)  \
-                       ": ASSERT: (" #cond ") " #__VA_ARGS__)); \
-    }
-#    else
-#        define PANIC_ASSERTN(cond, n, ...)                             \
-    if (!(cond)) {                                                      \
-        sys_panic(FSTR(#n ": ASSERT: (" #cond ") " #__VA_ARGS__));      \
-    }
-#    endif
+#if CONFIG_PANIC_ASSERT_FILE_LINE == 1
+#define PANIC_ASSERTN(cond, n, ...)                        \
+  if (!(cond)) {                                           \
+    sys_panic(FSTR(#n ":" __FILE__ ":" STRINGIFY(          \
+        __LINE__) ": ASSERT: (" #cond ") " #__VA_ARGS__)); \
+  }
 #else
-#    define PANIC_ASSERTN(cond, n, ...)
+#define PANIC_ASSERTN(cond, n, ...)                            \
+  if (!(cond)) {                                               \
+    sys_panic(FSTR(#n ": ASSERT: (" #cond ") " #__VA_ARGS__)); \
+  }
+#endif
+#else
+#define PANIC_ASSERTN(cond, n, ...)
 #endif
 
 /**

@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2014-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #ifndef __KERNEL_SYS_H__
 #define __KERNEL_SYS_H__
@@ -32,8 +12,8 @@
 #include "simba.h"
 #include "sys_port.h"
 
-#define VERSION_STR                        STRINGIFY(VERSION)
-#define SYS_TICK_MAX                         ((sys_tick_t)-1)
+#define VERSION_STR STRINGIFY(VERSION)
+#define SYS_TICK_MAX ((sys_tick_t)-1)
 
 typedef uint32_t sys_tick_t;
 
@@ -49,48 +29,47 @@ typedef void (*sys_on_fatal_fn_t)(int error);
  * System reset causes.
  */
 enum sys_reset_cause_t {
-    sys_reset_cause_unknown_t = 0,
-    sys_reset_cause_power_on_t,
-    sys_reset_cause_watchdog_timeout_t,
-    sys_reset_cause_software_t,
-    sys_reset_cause_external_t,
-    sys_reset_cause_jtag_t,
+  sys_reset_cause_unknown_t = 0,
+  sys_reset_cause_power_on_t,
+  sys_reset_cause_watchdog_timeout_t,
+  sys_reset_cause_software_t,
+  sys_reset_cause_external_t,
+  sys_reset_cause_jtag_t,
 #if defined(SYS_PORT_RESET_CAUSES)
-    SYS_PORT_RESET_CAUSES,
+  SYS_PORT_RESET_CAUSES,
 #endif
-    sys_reset_cause_max_t
+  sys_reset_cause_max_t
 };
-
 
 /**
  * Convertion from the time struct to system ticks.
  */
-static inline sys_tick_t t2st(const struct time_t *time_p)
-{
-    return (((sys_tick_t)(time_p)->seconds * CONFIG_SYSTEM_TICK_FREQUENCY) +
-            DIV_CEIL((DIV_CEIL((time_p)->nanoseconds, 1000)
-                      * CONFIG_SYSTEM_TICK_FREQUENCY), 1000000));
+static inline sys_tick_t t2st(const struct time_t *time_p) {
+  return (((sys_tick_t)(time_p)->seconds * CONFIG_SYSTEM_TICK_FREQUENCY) +
+          DIV_CEIL((DIV_CEIL((time_p)->nanoseconds, 1000) *
+                    CONFIG_SYSTEM_TICK_FREQUENCY),
+                   1000000));
 }
 
 /**
  * Convertion from system ticks to the time struct.
  */
-static inline void st2t(sys_tick_t tick, struct time_t *time_p)
-{
-    time_p->seconds = (tick / CONFIG_SYSTEM_TICK_FREQUENCY);
-    time_p->nanoseconds = (((1000000 * (tick % CONFIG_SYSTEM_TICK_FREQUENCY))
-                            / CONFIG_SYSTEM_TICK_FREQUENCY) * 1000);
+static inline void st2t(sys_tick_t tick, struct time_t *time_p) {
+  time_p->seconds = (tick / CONFIG_SYSTEM_TICK_FREQUENCY);
+  time_p->nanoseconds = (((1000000 * (tick % CONFIG_SYSTEM_TICK_FREQUENCY)) /
+                          CONFIG_SYSTEM_TICK_FREQUENCY) *
+                         1000);
 }
 
 struct sys_t {
-    sys_on_fatal_fn_t on_fatal_callback;
-    void *stdin_p;
-    void *stdout_p;
+  sys_on_fatal_fn_t on_fatal_callback;
+  void *stdin_p;
+  void *stdout_p;
 #if CONFIG_SYS_MEASURE_INTERRUPT_LOAD == 1
-    struct {
-        uint32_t start;
-        uint32_t time;
-    } interrupt;
+  struct {
+    uint32_t start;
+    uint32_t time;
+  } interrupt;
 #endif
 };
 

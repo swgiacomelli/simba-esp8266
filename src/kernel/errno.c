@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2017-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2017-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #include "simba.h"
 
@@ -100,17 +80,22 @@ static FAR const char eproto_string[] = "Protocol error";
 static FAR const char emultihop_string[] = "Multihop attempted";
 static FAR const char edotdot_string[] = "RFS specific error";
 static FAR const char ebadmsg_string[] = "Not a data message";
-static FAR const char eoverflow_string[] = "Value too large for defined data type";
+static FAR const char eoverflow_string[] =
+    "Value too large for defined data type";
 static FAR const char enotuniq_string[] = "Name not unique on network";
 static FAR const char ebadfd_string[] = "File descriptor in bad state";
 static FAR const char eremchg_string[] = "Remote address changed";
-static FAR const char elibacc_string[] = "Can not access a needed shared library";
+static FAR const char elibacc_string[] =
+    "Can not access a needed shared library";
 static FAR const char elibbad_string[] = "Accessing a corrupted shared library";
 static FAR const char elibscn_string[] = ".lib section in a.out corrupted";
-static FAR const char elibmax_string[] = "Attempting to link in too many shared libraries";
-static FAR const char elibexec_string[] = "Cannot exec a shared library directly";
+static FAR const char elibmax_string[] =
+    "Attempting to link in too many shared libraries";
+static FAR const char elibexec_string[] =
+    "Cannot exec a shared library directly";
 static FAR const char eilseq_string[] = "Illegal byte sequence";
-static FAR const char erestart_string[] = "Interrupted system call should be restarted";
+static FAR const char erestart_string[] =
+    "Interrupted system call should be restarted";
 static FAR const char estrpipe_string[] = "Streams pipe error";
 static FAR const char eusers_string[] = "Too many users";
 static FAR const char enotsock_string[] = "Socket operation on non-socket";
@@ -120,21 +105,29 @@ static FAR const char eprototype_string[] = "Protocol wrong type for socket";
 static FAR const char enoprotoopt_string[] = "Protocol not available";
 static FAR const char eprotonosupboard_string[] = "Protocol not supported";
 static FAR const char esocktnosupboard_string[] = "Socket type not supported";
-static FAR const char eopnotsupp_string[] = "Operation not supported on transport endpoint";
+static FAR const char eopnotsupp_string[] =
+    "Operation not supported on transport endpoint";
 static FAR const char epfnosupboard_string[] = "Protocol family not supported";
-static FAR const char eafnosupboard_string[] = "Address family not supported by protocol";
+static FAR const char eafnosupboard_string[] =
+    "Address family not supported by protocol";
 static FAR const char eaddrinuse_string[] = "Address already in use";
-static FAR const char eaddrnotavail_string[] = "Cannot assign requested address";
+static FAR const char eaddrnotavail_string[] =
+    "Cannot assign requested address";
 static FAR const char enetdown_string[] = "Network is down";
 static FAR const char enetunreach_string[] = "Network is unreachable";
-static FAR const char enetreset_string[] = "Network dropped connection because of reset";
-static FAR const char econnaborted_string[] = "Software caused connection abort";
+static FAR const char enetreset_string[] =
+    "Network dropped connection because of reset";
+static FAR const char econnaborted_string[] =
+    "Software caused connection abort";
 static FAR const char econnreset_string[] = "Connection reset by peer";
 static FAR const char enobufs_string[] = "No buffer space available";
-static FAR const char eisconn_string[] = "Transport endpoint is already connected";
+static FAR const char eisconn_string[] =
+    "Transport endpoint is already connected";
 static FAR const char enotconn_string[] = "Transport endpoint is not connected";
-static FAR const char eshutdown_string[] = "Cannot send after transport endpoint shutdown";
-static FAR const char etoomanyrefs_string[] = "Too many references: cannot splice";
+static FAR const char eshutdown_string[] =
+    "Cannot send after transport endpoint shutdown";
+static FAR const char etoomanyrefs_string[] =
+    "Too many references: cannot splice";
 static FAR const char etimedout_string[] = "Connection timed out";
 static FAR const char econnrefused_string[] = "Connection refused";
 static FAR const char ehostdown_string[] = "Host is down";
@@ -156,137 +149,135 @@ static FAR const char ekeyexpired_string[] = "Key has expired";
 static FAR const char ekeyrevoked_string[] = "Key has been revoked";
 static FAR const char ekeyrejected_string[] = "Key was rejected by service";
 
-static FAR const char* FAR const strings[] = {
-    eperm_string,
-    enoent_string,
-    esrch_string,
-    eintr_string,
-    eio_string,
-    enxio_string,
-    e2big_string,
-    enoexec_string,
-    ebadf_string,
-    echild_string,
-    eagain_string,
-    enomem_string,
-    eacces_string,
-    efault_string,
-    enotblk_string,
-    ebusy_string,
-    eexist_string,
-    exdev_string,
-    enodev_string,
-    enotdir_string,
-    eisdir_string,
-    einval_string,
-    enfile_string,
-    emfile_string,
-    enotty_string,
-    etxtbsy_string,
-    efbig_string,
-    enospc_string,
-    espipe_string,
-    erofs_string,
-    emlink_string,
-    epipe_string,
-    edom_string,
-    erange_string,
-    edeadlk_string,
-    enametoolong_string,
-    enolck_string,
-    enosys_string,
-    enotempty_string,
-    eloop_string,
-    eagain_string,
-    enomsg_string,
-    eidrm_string,
-    echrng_string,
-    el2nsync_string,
-    el3hlt_string,
-    el3rst_string,
-    elnrng_string,
-    eunatch_string,
-    enocsi_string,
-    el2hlt_string,
-    ebade_string,
-    ebadr_string,
-    exfull_string,
-    enoano_string,
-    ebadrqc_string,
-    ebadslt_string,
-    edeadlk_string,
-    ebfont_string,
-    enostr_string,
-    enodata_string,
-    etime_string,
-    enosr_string,
-    enonet_string,
-    enopkg_string,
-    eremote_string,
-    enolink_string,
-    eadv_string,
-    esrmnt_string,
-    ecomm_string,
-    eproto_string,
-    emultihop_string,
-    edotdot_string,
-    ebadmsg_string,
-    eoverflow_string,
-    enotuniq_string,
-    ebadfd_string,
-    eremchg_string,
-    elibacc_string,
-    elibbad_string,
-    elibscn_string,
-    elibmax_string,
-    elibexec_string,
-    eilseq_string,
-    erestart_string,
-    estrpipe_string,
-    eusers_string,
-    enotsock_string,
-    edestaddrreq_string,
-    emsgsize_string,
-    eprototype_string,
-    enoprotoopt_string,
-    eprotonosupboard_string,
-    esocktnosupboard_string,
-    eopnotsupp_string,
-    epfnosupboard_string,
-    eafnosupboard_string,
-    eaddrinuse_string,
-    eaddrnotavail_string,
-    enetdown_string,
-    enetunreach_string,
-    enetreset_string,
-    econnaborted_string,
-    econnreset_string,
-    enobufs_string,
-    eisconn_string,
-    enotconn_string,
-    eshutdown_string,
-    etoomanyrefs_string,
-    etimedout_string,
-    econnrefused_string,
-    ehostdown_string,
-    ehostunreach_string,
-    ealready_string,
-    einprogress_string,
-    estale_string,
-    euclean_string,
-    enotnam_string,
-    enavail_string,
-    eisnam_string,
-    eremoteio_string,
-    edquot_string,
-    enomedium_string,
-    emediumtype_string,
-    ecanceled_string,
-    enokey_string,
-    ekeyexpired_string,
-    ekeyrevoked_string,
-    ekeyrejected_string
-};
+static FAR const char* FAR const strings[] = {eperm_string,
+                                              enoent_string,
+                                              esrch_string,
+                                              eintr_string,
+                                              eio_string,
+                                              enxio_string,
+                                              e2big_string,
+                                              enoexec_string,
+                                              ebadf_string,
+                                              echild_string,
+                                              eagain_string,
+                                              enomem_string,
+                                              eacces_string,
+                                              efault_string,
+                                              enotblk_string,
+                                              ebusy_string,
+                                              eexist_string,
+                                              exdev_string,
+                                              enodev_string,
+                                              enotdir_string,
+                                              eisdir_string,
+                                              einval_string,
+                                              enfile_string,
+                                              emfile_string,
+                                              enotty_string,
+                                              etxtbsy_string,
+                                              efbig_string,
+                                              enospc_string,
+                                              espipe_string,
+                                              erofs_string,
+                                              emlink_string,
+                                              epipe_string,
+                                              edom_string,
+                                              erange_string,
+                                              edeadlk_string,
+                                              enametoolong_string,
+                                              enolck_string,
+                                              enosys_string,
+                                              enotempty_string,
+                                              eloop_string,
+                                              eagain_string,
+                                              enomsg_string,
+                                              eidrm_string,
+                                              echrng_string,
+                                              el2nsync_string,
+                                              el3hlt_string,
+                                              el3rst_string,
+                                              elnrng_string,
+                                              eunatch_string,
+                                              enocsi_string,
+                                              el2hlt_string,
+                                              ebade_string,
+                                              ebadr_string,
+                                              exfull_string,
+                                              enoano_string,
+                                              ebadrqc_string,
+                                              ebadslt_string,
+                                              edeadlk_string,
+                                              ebfont_string,
+                                              enostr_string,
+                                              enodata_string,
+                                              etime_string,
+                                              enosr_string,
+                                              enonet_string,
+                                              enopkg_string,
+                                              eremote_string,
+                                              enolink_string,
+                                              eadv_string,
+                                              esrmnt_string,
+                                              ecomm_string,
+                                              eproto_string,
+                                              emultihop_string,
+                                              edotdot_string,
+                                              ebadmsg_string,
+                                              eoverflow_string,
+                                              enotuniq_string,
+                                              ebadfd_string,
+                                              eremchg_string,
+                                              elibacc_string,
+                                              elibbad_string,
+                                              elibscn_string,
+                                              elibmax_string,
+                                              elibexec_string,
+                                              eilseq_string,
+                                              erestart_string,
+                                              estrpipe_string,
+                                              eusers_string,
+                                              enotsock_string,
+                                              edestaddrreq_string,
+                                              emsgsize_string,
+                                              eprototype_string,
+                                              enoprotoopt_string,
+                                              eprotonosupboard_string,
+                                              esocktnosupboard_string,
+                                              eopnotsupp_string,
+                                              epfnosupboard_string,
+                                              eafnosupboard_string,
+                                              eaddrinuse_string,
+                                              eaddrnotavail_string,
+                                              enetdown_string,
+                                              enetunreach_string,
+                                              enetreset_string,
+                                              econnaborted_string,
+                                              econnreset_string,
+                                              enobufs_string,
+                                              eisconn_string,
+                                              enotconn_string,
+                                              eshutdown_string,
+                                              etoomanyrefs_string,
+                                              etimedout_string,
+                                              econnrefused_string,
+                                              ehostdown_string,
+                                              ehostunreach_string,
+                                              ealready_string,
+                                              einprogress_string,
+                                              estale_string,
+                                              euclean_string,
+                                              enotnam_string,
+                                              enavail_string,
+                                              eisnam_string,
+                                              eremoteio_string,
+                                              edquot_string,
+                                              enomedium_string,
+                                              emediumtype_string,
+                                              ecanceled_string,
+                                              enokey_string,
+                                              ekeyexpired_string,
+                                              ekeyrevoked_string,
+                                              ekeyrejected_string};
 
 static FAR const char estack_string[] = "Stack corrupt";
 static FAR const char ebtassert_string[] = "Test assertion";
@@ -296,27 +287,20 @@ static FAR const char enotmounted_string[] = "Resource not mounted";
 static FAR const char ekeynotfound_string[] = "Key not found";
 static FAR const char ebadvalue_string[] = "Bad value";
 
-static FAR const char *FAR const simba_strings[] = {
-    estack_string,
-    ebtassert_string,
-    eassert_string,
-    enocommand_string,
-    enotmounted_string,
-    ekeynotfound_string,
-    ebadvalue_string
-};
+static FAR const char* FAR const simba_strings[] = {
+    estack_string,      ebtassert_string,    eassert_string,  enocommand_string,
+    enotmounted_string, ekeynotfound_string, ebadvalue_string};
 
-far_string_t errno_as_string(int errno)
-{
-    if (errno < 0) {
-        errno *= -1;
-    }
+far_string_t errno_as_string(int errno) {
+  if (errno < 0) {
+    errno *= -1;
+  }
 
-    if ((errno >= EPERM) && (errno <= EKEYREJECTED)) {
-        return strings[errno - EPERM];
-    } else if ((errno >= ESTACK) && (errno <= EBADVALUE)) {
-        return simba_strings[errno - ESTACK];
-    } else {
-        return (NULL);
-    }
+  if ((errno >= EPERM) && (errno <= EKEYREJECTED)) {
+    return strings[errno - EPERM];
+  } else if ((errno >= ESTACK) && (errno <= EBADVALUE)) {
+    return simba_strings[errno - ESTACK];
+  } else {
+    return (NULL);
+  }
 }

@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2014-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #ifndef __KERNEL_TYPES_H__
 #define __KERNEL_TYPES_H__
@@ -66,12 +46,12 @@
 /**
  * Used internally by `TOKENPASTE()`.
  */
-#define TOKENPASTE2(x, y) x ## y
+#define TOKENPASTE2(x, y) x##y
 
 /**
  * Create a unique token.
  */
-#define UNIQUE(x)  TOKENPASTE(x, TOKENPASTE(___, __LINE__))
+#define UNIQUE(x) TOKENPASTE(x, TOKENPASTE(___, __LINE__))
 
 /**
  * Debug print of file and line.
@@ -79,9 +59,9 @@
 #define PRINT_FILE_LINE() std_printf(OSTR("%s:%d:\r\n"), __FILE__, __LINE__);
 
 #if CONFIG_DEBUG == 1
-#    define STD_PRINTF_DEBUG(...) std_printf(__VA_ARGS__)
+#define STD_PRINTF_DEBUG(...) std_printf(__VA_ARGS__)
 #else
-#    define STD_PRINTF_DEBUG(...)
+#define STD_PRINTF_DEBUG(...)
 #endif
 
 /**
@@ -106,15 +86,16 @@
  */
 #define indexof(e_p, a) (e_p - &(a)[0])
 
-#define container_of(ptr, type, member)                         \
-    ({                                                          \
-        const typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-        (type *)( (char *)__mptr - offsetof(type,member) );})
+#define container_of(ptr, type, member)                \
+  ({                                                   \
+    const typeof(((type *)0)->member) *__mptr = (ptr); \
+    (type *)((char *)__mptr - offsetof(type, member)); \
+  })
 
 /**
  * Integer division that rounds the result up.
  */
-#define DIV_CEIL(n, d) (((n) + (d) - 1) / (d))
+#define DIV_CEIL(n, d) (((n) + (d)-1) / (d))
 
 /**
  * Integer division that rounds the result to the closest integer.
@@ -125,32 +106,30 @@
  * Get the minimum value of the two.
  */
 #ifndef MIN
-#    define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
 /**
  * Get the maximum value of the two.
  */
 #ifndef MAX
-#    define MAX(a, b) (((a) > (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #endif
 
 #ifndef BIT
-#    define BIT(pos) (1 << (pos))
+#define BIT(pos) (1 << (pos))
 #endif
 
-#define BITFIELD_SET(name, value)               \
-    (((value) << name ## _POS) & name ## _MASK)
+#define BITFIELD_SET(name, value) (((value) << name##_POS) & name##_MASK)
 
-#define BITFIELD_GET(name, value)               \
-    (((value) & name ## _MASK) >> name ## _POS)
+#define BITFIELD_GET(name, value) (((value)&name##_MASK) >> name##_POS)
 
 #if defined(SIMBAPP)
-#    define OSTR(string) __simbapp_fmtstr_begin__ string __simbapp_fmtstr_end__
-#    define CSTR(string) __simbapp_cmdstr_begin__ string __simbapp_cmdstr_end__
+#define OSTR(string) __simbapp_fmtstr_begin__ string __simbapp_fmtstr_end__
+#define CSTR(string) __simbapp_cmdstr_begin__ string __simbapp_cmdstr_end__
 #else
-#    define OSTR(string) FSTR(string)
-#    define CSTR(string) FSTR(string)
+#define OSTR(string) FSTR(string)
+#define CSTR(string) FSTR(string)
 #endif
 
 typedef uint8_t u8_t;
@@ -161,43 +140,42 @@ typedef uint32_t u32_t;
 typedef int32_t s32_t;
 
 struct thrd_prio_list_elem_t {
-    struct thrd_prio_list_elem_t *next_p;
-    struct thrd_t *thrd_p;
+  struct thrd_prio_list_elem_t *next_p;
+  struct thrd_t *thrd_p;
 };
 
 struct thrd_prio_list_t {
-    struct thrd_prio_list_elem_t *head_p;
+  struct thrd_prio_list_elem_t *head_p;
 };
 
 /**
  * Input-output vector.
  */
 struct iov_t {
-    void *buf_p;
-    size_t size;
+  void *buf_p;
+  size_t size;
 };
 
 /**
  * Input-output vector with address.
  */
 struct iov_uintptr_t {
-    uintptr_t address;
-    size_t size;
+  uintptr_t address;
+  size_t size;
 };
 
 static inline size_t iov_uintptr_size(struct iov_uintptr_t *iov_p,
-                                      size_t length)
-{
-    size_t i;
-    size_t size;
+                                      size_t length) {
+  size_t i;
+  size_t size;
 
-    size = 0;
+  size = 0;
 
-    for (i = 0; i < length; i++) {
-        size += iov_p[i].size;
-    }
+  for (i = 0; i < length; i++) {
+    size += iov_p[i].size;
+  }
 
-    return (size);
+  return (size);
 }
 
 #endif

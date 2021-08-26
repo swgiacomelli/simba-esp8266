@@ -1,30 +1,10 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2018, Erik Moqvist
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use, copy,
- * modify, merge, publish, distribute, sublicense, and/or sell copies
- * of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
- * BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
- * ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
- * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- *
- * This file is part of the Simba project.
- */
+// Copyright (c) 2021 Steven Giacomelli. All rights reserved.
+//
+// Derived from the Simba project.
+// Copyright (c) 2014-2018, Erik Moqvist
+//
+// This work is licensed under the terms of the MIT license.
+// For a copy, see <https://opensource.org/licenses/MIT>.
 
 #ifndef __KERNEL_THRD_H__
 #define __KERNEL_THRD_H__
@@ -60,63 +40,62 @@
  * Reschuedule from isr. Used by preemptive systems to interrupt low
  * priority threads in favour of high priority threads.
  */
-#define THRD_RESCHEDULE_ISR                     \
-    do {                                        \
-        THRD_CONTEXT_STORE_ISR;                 \
-        thrd_yield_isr();                       \
-        THRD_CONTEXT_LOAD_ISR;                  \
-    } while (0)
-
+#define THRD_RESCHEDULE_ISR \
+  do {                      \
+    THRD_CONTEXT_STORE_ISR; \
+    thrd_yield_isr();       \
+    THRD_CONTEXT_LOAD_ISR;  \
+  } while (0)
 
 /**
  * A thread environment variable.
  */
 struct thrd_environment_variable_t {
-    const char *name_p;
-    const char *value_p;
+  const char *name_p;
+  const char *value_p;
 };
 
 struct thrd_environment_t {
-    struct thrd_environment_variable_t *variables_p;
-    size_t number_of_variables;
-    size_t max_number_of_variables;
+  struct thrd_environment_variable_t *variables_p;
+  size_t number_of_variables;
+  size_t max_number_of_variables;
 };
 
 struct thrd_t {
-    struct {
-        struct thrd_prio_list_elem_t elem;
-    } scheduler;
-    struct thrd_port_t port;
-    int8_t prio;
-    int8_t state;
-    int err;
-    uint8_t log_mask;
-    struct timer_t *timer_p;
-    const char *name_p;
-    struct thrd_t *next_p;
+  struct {
+    struct thrd_prio_list_elem_t elem;
+  } scheduler;
+  struct thrd_port_t port;
+  int8_t prio;
+  int8_t state;
+  int err;
+  uint8_t log_mask;
+  struct timer_t *timer_p;
+  const char *name_p;
+  struct thrd_t *next_p;
 #if CONFIG_THRD_TERMINATE == 1
-    struct sem_t join_sem;
+  struct sem_t join_sem;
 #endif
-    struct {
+  struct {
 #if CONFIG_THRD_CPU_USAGE == 1
-        struct {
+    struct {
 #if CONFIG_FLOAT == 1
-            float usage;
+      float usage;
 #else
-            int usage;
+      int usage;
 #endif
-        } cpu;
+    } cpu;
 #endif
 #if CONFIG_THRD_SCHEDULED == 1
-        uint32_t scheduled;
+    uint32_t scheduled;
 #endif
-    } statistics;
+  } statistics;
 #if CONFIG_THRD_ENV == 1
-    struct thrd_environment_t env;
+  struct thrd_environment_t env;
 #endif
-    size_t stack_size;
+  size_t stack_size;
 #if CONFIG_PANIC_ASSERT == 1
-    uint16_t stack_low_magic;
+  uint16_t stack_low_magic;
 #endif
 };
 
@@ -149,11 +128,8 @@ int thrd_module_init(void);
  *
  * @return Thread id, or NULL on error.
  */
-struct thrd_t *thrd_spawn(void *(*main)(void *),
-                          void *arg_p,
-                          int prio,
-                          void *stack_p,
-                          size_t stack_size);
+struct thrd_t *thrd_spawn(void *(*main)(void *), void *arg_p, int prio,
+                          void *stack_p, size_t stack_size);
 
 /**
  * Suspend current thread and wait to be resumed or a timeout occurs
@@ -344,8 +320,7 @@ const char *thrd_get_global_env(const char *name_p);
  *
  * @return zero(0) or negative error code.
  */
-int thrd_init_env(struct thrd_environment_variable_t *variables_p,
-                  int length);
+int thrd_init_env(struct thrd_environment_variable_t *variables_p, int length);
 
 /**
  * Set the value of given environment variable. The pointers to given
